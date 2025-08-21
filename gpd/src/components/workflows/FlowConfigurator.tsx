@@ -1,0 +1,158 @@
+import * as React from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus, GripVertical } from "lucide-react";
+import SortableJS from "sortablejs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Unit } from "@/api/units/types";
+import  type { NodeItem } from "./types";
+
+interface FlowConfigurationProps {
+  units: Unit[];
+  unitsError?: Error | null;
+  isLoadingUnits: boolean;
+  holder?: string;
+  onHolderChange: (value: string | undefined) => void;
+  pareceres: number;
+  onPareceresChange: (value: number) => void;
+  nodesList: NodeItem[];
+  onAdicionar: () => void;
+  podeAdicionar: boolean;
+  listRef: React.RefObject<HTMLDivElement | null>;
+  selectKey: number
+  onNodesChange: (nodes: NodeItem[]) => void;
+}
+
+export function FlowConfiguration({
+  units,
+  unitsError,
+  isLoadingUnits,
+  holder,
+  onHolderChange,
+  pareceres,
+  onPareceresChange,
+  nodesList,
+  onAdicionar,
+  podeAdicionar,
+  listRef,
+  selectKey,
+  onNodesChange
+}: FlowConfigurationProps) {
+
+
+React.useEffect(() => {
+  if (!listRef.current) return;
+
+  const sortable = SortableJS.create(listRef.current, {
+    animation: 150,
+    ghostClass: "bg-gray-200/50",
+    handle: ".drag-handle",
+    onEnd: (evt) => {
+      const newList = [...nodesList];
+      const [movedItem] = newList.splice(evt.oldIndex!, 1);
+      newList.splice(evt.newIndex!, 0, movedItem);
+
+      onNodesChange(newList);
+    },
+  });
+
+  return () => sortable.destroy();
+}, [listRef, nodesList, onNodesChange]);
+
+
+
+  return (
+    <>
+      <div>
+        <h2 className="text-sm font-semibold mb-0.5">Configuração do Flow</h2>
+        <p className="text-xs text-gray-600 mb-2">
+          Selecione o holder e indique o número de pareceres necessários.
+        </p>
+
+        <div className="flex gap-2 items-end">
+          <div className="flex-1 flex flex-col gap-1">
+            <Label htmlFor="holder" className="text-xs font-medium">
+              Holder
+            </Label>
+            <Select key={selectKey} value={holder} onValueChange={onHolderChange}>
+              <SelectTrigger className="w-full min-w-[150px] max-w-[150px]">
+                <SelectValue
+                  placeholder={
+                    isLoadingUnits ? "Carregando Units..." : "Selecionar Unit"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="w-full min-w-[150px] max-w-[150px]">
+                {unitsError && (
+                  <span className="text-red-500 text-xs">{unitsError.message}</span>
+                )}
+                {isLoadingUnits && <span className="text-xs">Carregando...</span>}
+                {!isLoadingUnits &&
+                  units.map((unit: Unit) => (
+                    <SelectItem key={unit.id} value={unit.name}>
+                      {unit.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-16 flex flex-col gap-1">
+            <Label
+              htmlFor="pareceres"
+              className="text-xs font-medium text-right"
+            >
+              Pareceres
+            </Label>
+            <Input
+              id="pareceres"
+              type="number"
+              value={pareceres}
+              onChange={(e) => onPareceresChange(Number(e.target.value))}
+              placeholder="0-5"
+              min={0}
+              max={5}
+            />
+          </div>
+
+          <Button
+            onClick={onAdicionar}
+            className="p-0 flex justify-center items-center"
+            disabled={!podeAdicionar}
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-sm font-semibold mb-0.5">Nós Criados</h2>
+        <p className="text-xs text-gray-600 mb-1">
+          Lista dos nós atualmente adicionados ao fluxo.
+        </p>
+
+        <div ref={listRef} className="flex flex-col gap-1">
+          {nodesList.map((node) => (
+            <div
+              key={node.id}
+              className="flex items-center justify-between text-xs cursor-default"
+            >
+              <span className="overflow-hidden whitespace-nowrap text-ellipsis">
+                {node.holder} - {node.parecer} parecer
+                {node.parecer === 1 ? "" : "es"}
+              </span>
+              <GripVertical className="drag-handle w-4 h-4 text-gray-500 cursor-grab hover:cursor-grab" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
