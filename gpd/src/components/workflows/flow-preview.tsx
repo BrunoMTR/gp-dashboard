@@ -12,9 +12,13 @@ import {
 } from '@xyflow/react';
 import { useState, useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
-import { WorkflowConfiguration, type NodeItem } from './WorkflowConfiguration';
+import { WorkflowConfiguration } from './WorkflowConfiguration';
+import type { NodeItem } from '../workflows/types'
+
 
 export function FlowPreview() {
+
+
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
 
@@ -31,6 +35,8 @@ export function FlowPreview() {
     }, []);
 
     const proOptions = { hideAttribution: true };
+
+
 
     const handleFlowConfigChange = useCallback((nodesList: NodeItem[]) => {
         const reactFlowNodes: Node[] = nodesList.map((item, index) => ({
@@ -63,10 +69,11 @@ export function FlowPreview() {
         setNodes(reactFlowNodes);
         setEdges(reactFlowEdges);
     }, []);
+    
 
     return (
         <div className="flex-1 flex items-center justify-center border rounded-lg p-4 bg-muted/10">
-            <div style={{ width: '75vw', height: '70vh' }}>
+            <div style={{ width: '70vw', height: '70vh' }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -74,11 +81,13 @@ export function FlowPreview() {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     proOptions={proOptions}
-                >
+                    >
                     <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
                     <WorkflowConfiguration onChangeNodes={handleFlowConfigChange} />
                 </ReactFlow>
+                
             </div>
+            
         </div>
     );
 }

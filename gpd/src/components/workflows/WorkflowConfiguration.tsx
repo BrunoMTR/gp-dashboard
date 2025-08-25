@@ -5,10 +5,10 @@ import { useCreateWorkflow, useCreateFlow } from "../../api/workflows/mutations"
 import { useGetUnitsOptions } from '../../api/units/queries'
 import { useQuery } from "@tanstack/react-query";
 import type { Flow, WorkflowInput } from "@/api/workflows/types";
-import { AlertMutation } from "./alert"
 import { WorkflowForm } from "./WorkflowForm";
 import { FlowConfiguration } from "./FlowConfigurator";
 import type { NodeItem } from "./types";
+import { WorkflowAlerts } from "./WorkflowAlerts";
 
 
 
@@ -32,7 +32,7 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
 
   const { mutate: mutateFlow } = useCreateFlow();
 
-  const { mutate: mutateWorkflow, isPending, isError, error, isSuccess } = useCreateWorkflow(
+  const { mutate: mutateWorkflow, isPending, isError,  isSuccess } = useCreateWorkflow(
     (workflowCriado) => {
       const flowPayload: Flow = {
         applicationId: workflowCriado.id,
@@ -59,8 +59,6 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   const handleSave = () => {
     mutateWorkflow({ ...workflow });
   };
-
-
 
 
   React.useEffect(() => {
@@ -93,7 +91,7 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
 
 
   return (
-    <Card className="fixed right-10 w-[310px] h-[520px] flex flex-col z-50 shadow-lg opacity-90">
+    <Card className="fixed right-10 w-[310px] h-[70vh] flex flex-col z-50 shadow-lg opacity-90">
 
       <CardHeader className=" px-4 flex flex-col gap-2">
         <CardTitle className="text-base font-semibold">Configuração do Workflow</CardTitle>
@@ -114,42 +112,31 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
           onPareceresChange={(val) => {
             let value = Math.min(5, Math.max(0, val));
             setPareceres(value);
-          } }
+          }}
           nodesList={nodesList}
           onAdicionar={handleAdicionar}
           podeAdicionar={podeAdicionar}
           listRef={listRef}
           key={selectKey}
-          onNodesChange={setNodesList} selectKey={0}        />
+          onNodesChange={setNodesList} selectKey={0} />
+
+        <div className="h-[10%] py-1 px-4 flex gap-2 border-t items-center">
+          <Button className="flex-1 text-xs h-7" onClick={handleSave} disabled={isPending}>
+            {isPending ? "Salvando..." : "Salvar"}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleLimpar}
+            className="flex-1 text-xs h-7"
+            disabled={!podeLimpar}
+          >
+            Limpar
+          </Button>
+        </div>
 
       </CardContent>
-
-
-      <CardContent className="h-[10%] py-1 px-4 flex gap-2 border-t items-center">
-        <Button className="flex-1 text-xs h-7" onClick={handleSave} disabled={isPending}>
-          {isPending ? "Salvando..." : "Salvar"}
-        </Button>
-
-
-        <Button
-          variant="outline"
-          onClick={handleLimpar}
-          className="flex-1 text-xs h-7"
-          disabled={!podeLimpar}
-        >
-          Limpar
-        </Button>
-      </CardContent>
-
-      {isPending && (
-        <AlertMutation status="loading" message="Salvando workflow..." />
-      )}
-      {isSuccess && (
-        <AlertMutation status="success" message="Workflow criado com sucesso!" />
-      )}
-      {isError && (
-        <AlertMutation status="error" message={error?.message || "Falha ao criar workflow"} />
-      )}
+     <WorkflowAlerts isPending={isPending} isSuccess={isSuccess} isError={isError}/>
     </Card>
 
   );

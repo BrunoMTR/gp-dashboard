@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useWorkflowState } from '@/store/workflowStore'
-
+import AppIcon from "@/images/ico.png"
 import { ChevronRight, FileText, PlusCircle, Layers } from "lucide-react"
 
 import {
@@ -8,7 +8,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -44,14 +43,30 @@ export function AppSidebar() {
   }
   return (
     <Sidebar>
-      <SidebarHeader>Header</SidebarHeader>
+      <SidebarHeader className="px-4 py-4">
+        <div className="flex flex-row items-center">
+          <img
+            src={AppIcon}
+            alt="App Icon"
+            className="w-12 h-14 object-contain"
+          />
+
+          <div className="flex flex-col">
+            <span className="text-base font-semibold">Flow Hub</span>
+            <span className="text-xs text-muted-foreground">
+              Verão 1.0
+            </span>
+          </div>
+        </div>
+      </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+
           <SidebarGroupContent>
 
             <Collapsible defaultOpen className="group/collapsible">
-              <SidebarMenuItem>
+              <SidebarMenuItem className="list-none">
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
                     <Layers className="mr-2" />

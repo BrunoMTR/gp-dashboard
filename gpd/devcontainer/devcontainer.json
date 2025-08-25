@@ -1,0 +1,13 @@
+{
+  "name": "React Codespace",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:20",
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "API-GP": {
+          "permissions": "read-all"
+        }
+      }
+    }
+  }
+}
