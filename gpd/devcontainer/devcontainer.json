@@ -4,7 +4,7 @@
   "customizations": {
     "codespaces": {
       "repositories": {
-        "API-GP": {
+        "BrunoMTR/API-GP": {
           "permissions": "read-all"
         }
       }
