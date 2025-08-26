@@ -14,9 +14,12 @@ import { useState, useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
 import { WorkflowConfiguration } from './WorkflowConfiguration';
 import type { NodeItem } from '../workflows/types'
+import { DepartmentNode } from './department-node';
 
-
-export function FlowPreview() {
+    const nodeTypes = {
+        department: DepartmentNode, // "department" será o tipo usado no node
+    };
+export function FlowPreview({ NodesChange }: { NodesChange?: (nodesList: NodeItem[]) => void }) {
 
 
     const [nodes, setNodes] = useState<Node[]>([]);
@@ -39,16 +42,18 @@ export function FlowPreview() {
 
 
     const handleFlowConfigChange = useCallback((nodesList: NodeItem[]) => {
+      
         const reactFlowNodes: Node[] = nodesList.map((item, index) => ({
-            id: item.id.toString(),
+            id: item.key.toString(),
+            type: "department",
             data: { label: item.holder },
             position: { x: 50, y: index * 80 },
         }));
 
         const reactFlowEdges: Edge[] = nodesList.slice(1).map((item, index) => ({
-            id: `edge-${nodesList[index].id}-${item.id}`,
-            source: nodesList[index].id.toString(),
-            target: item.id.toString(),
+            id: `edge-${nodesList[index].key}-${item.key}`,
+            source: nodesList[index].key.toString(),
+            target: item.key.toString(),
             label: nodesList[index].parecer.toString(),
         }));
 
@@ -57,9 +62,9 @@ export function FlowPreview() {
             const first = nodesList[0];
             const last = nodesList[nodesList.length - 1];
             reactFlowEdges.push({
-                id: `edge-${last.id}-${first.id}`,
-                source: last.id.toString(),
-                target: first.id.toString(),
+                id: `edge-${last.key}-${first.key}`,
+                source: last.key.toString(),
+                target: first.key.toString(),
                 label: last.parecer.toString(),
             });
         }
@@ -68,7 +73,9 @@ export function FlowPreview() {
 
         setNodes(reactFlowNodes);
         setEdges(reactFlowEdges);
-    }, []);
+
+        if (NodesChange) NodesChange(nodesList);
+    }, [onNodesChange]);
     
 
     return (
@@ -81,6 +88,7 @@ export function FlowPreview() {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     proOptions={proOptions}
+                    nodeTypes={nodeTypes}
                     >
                     <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
                     <WorkflowConfiguration onChangeNodes={handleFlowConfigChange} />

@@ -9,6 +9,10 @@ import { WorkflowForm } from "./WorkflowForm";
 import { FlowConfiguration } from "./FlowConfigurator";
 import type { NodeItem } from "./types";
 import { WorkflowAlerts } from "./WorkflowAlerts";
+import { toast } from "sonner";
+import { WorkflowErrorAlert } from "./WorkflowErrorAlert";
+
+
 
 
 
@@ -18,10 +22,11 @@ interface WorkflowConfigurationProps {
 
 
 export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationProps) {
-  const [holder, setHolder] = React.useState<string | undefined>();
+  const [selectedUnitId, setSelectedUnitId] = React.useState<string | undefined>();
   const [pareceres, setPareceres] = React.useState<number>(0);
   const [nodesList, setNodesList] = React.useState<NodeItem[]>([]);
   const [selectKey, setSelectKey] = React.useState<number>(0);
+  const [alertMessage, setAlertMessage] = React.useState<string>("");
 
 
   const idCounter = React.useRef(0);
@@ -32,16 +37,20 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
 
   const { mutate: mutateFlow } = useCreateFlow();
 
-  const { mutate: mutateWorkflow, isPending, isError,  isSuccess } = useCreateWorkflow(
+  const { mutate: mutateWorkflow, isPending, isError, isSuccess } = useCreateWorkflow(
     (workflowCriado) => {
       const flowPayload: Flow = {
         applicationId: workflowCriado.id,
-        nodes: nodesList.map((n) => ({
-          originId: n.id,
-          destinationId: n.id,
-          approvals: n.parecer,
-        })),
+        nodes: nodesList.map((n, index, arr) => {
+          if (index === arr.length - 1) return null;
+          return {
+            originId: n.id,
+            destinationId: arr[index + 1].id,
+            approvals: n.parecer,
+          };
+        }).filter(Boolean) as Flow["nodes"],
       };
+
 
       mutateFlow(flowPayload);
     }
@@ -57,8 +66,38 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   });
 
   const handleSave = () => {
+    if (nodesList.length === 0) {
+      WorkflowErrorAlert("Adicione pelo menos um node antes de salvar.");
+      return;
+    }
+
+    // Valida pareceres
+    for (let i = 0; i < nodesList.length; i++) {
+      if (i > 0 && nodesList[i].parecer <= 0) {
+        WorkflowErrorAlert(`O número de pareceres do node ${i + 1} deve ser maior que 0.`);
+        return;
+      }
+    }
+
+    // Valida nodes consecutivos iguais
+    for (let i = 1; i < nodesList.length; i++) {
+      if (nodesList[i].id === nodesList[i - 1].id) {
+        WorkflowErrorAlert(`Os nodes ${i} e ${i + 1} não podem ter a mesma unidade.`);
+        return;
+      }
+    }
+
+    // Valida último node != primeiro node (se houver mais de 1)
+    if (nodesList.length > 1 && nodesList[0].id === nodesList[nodesList.length - 1].id) {
+      WorkflowErrorAlert("O último node não pode ser igual ao primeiro.");
+    
+      return;
+    }
+
+    // Se passou todas as validações, salva
     mutateWorkflow({ ...workflow });
   };
+
 
 
   React.useEffect(() => {
@@ -66,27 +105,52 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   }, [nodesList, onChangeNodes]);
 
   const handleAdicionar = () => {
-    if (!holder) return;
+    if (!selectedUnitId) return;
     if (nodesList.length >= 10) return;
 
+    const lastNode = nodesList[nodesList.length - 1];
+    const firstNode = nodesList[0];
+
+    // Não permitir unidade repetida consecutiva
+    if (lastNode && lastNode.id === Number(selectedUnitId)) {
+      WorkflowErrorAlert("Não pode adicionar a mesma unidade consecutivamente.");
+      return;
+    }
+
+    // Valida pareceres (exceto no primeiro node, que pode ser 0)
+    if (nodesList.length > 0 && pareceres <= 0) {
+      WorkflowErrorAlert("O número de pareceres deve ser maior que 0.");
+      return;
+    }
+
+    // Não permitir que o último node seja igual ao primeiro (apenas se houver >1 node)
+    if (nodesList.length > 1 && firstNode.id === Number(selectedUnitId)) {
+      WorkflowErrorAlert("O último node não pode ser igual ao primeiro.");
+      return;
+    }
+
+
+
     const novoItem: NodeItem = {
-      id: idCounter.current++,
-      holder,
+      key: idCounter.current++,
+      id: Number(selectedUnitId),
+      holder: unitsData.find(u => u.id === Number(selectedUnitId))?.name || "",
       parecer: pareceres,
     };
 
-    setNodesList((prev) => [...prev, novoItem]);
+    setNodesList(prev => [...prev, novoItem]);
   };
 
+
   const handleLimpar = () => {
-    setHolder(undefined);
+    setSelectedUnitId(undefined);
     setPareceres(0);
     setNodesList([]);
     setSelectKey((prev) => prev + 1);
   };
 
 
-  const podeAdicionar = holder !== undefined && nodesList.length < 10;
+  const podeAdicionar = !!selectedUnitId && nodesList.length < 10;
   const podeLimpar = nodesList.length > 0;
 
 
@@ -106,8 +170,8 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
           units={unitsData}
           unitsError={unitsError}
           isLoadingUnits={isLoadingUnits}
-          holder={holder}
-          onHolderChange={setHolder}
+          holder={selectedUnitId}
+          onHolderChange={setSelectedUnitId}
           pareceres={pareceres}
           onPareceresChange={(val) => {
             let value = Math.min(5, Math.max(0, val));
@@ -119,6 +183,8 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
           listRef={listRef}
           key={selectKey}
           onNodesChange={setNodesList} selectKey={0} />
+
+
 
         <div className="h-[10%] py-1 px-4 flex gap-2 border-t items-center">
           <Button className="flex-1 text-xs h-7" onClick={handleSave} disabled={isPending}>
@@ -136,7 +202,8 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
         </div>
 
       </CardContent>
-     <WorkflowAlerts isPending={isPending} isSuccess={isSuccess} isError={isError}/>
+      <WorkflowAlerts isPending={isPending} isSuccess={isSuccess} isError={isError} />
+
     </Card>
 
   );

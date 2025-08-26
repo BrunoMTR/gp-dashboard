@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, GripVertical } from "lucide-react";
+import { CriarUnitDialog } from "./CriarUnitDialog";
 import SortableJS from "sortablejs";
 import {
   Select,
@@ -10,9 +11,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator
 } from "@/components/ui/select";
 import type { Unit } from "@/api/units/types";
-import  type { NodeItem } from "./types";
+import type { NodeItem } from "./types";
+
 
 interface FlowConfigurationProps {
   units: Unit[];
@@ -43,28 +46,45 @@ export function FlowConfiguration({
   podeAdicionar,
   listRef,
   selectKey,
-  onNodesChange
+  onNodesChange,
 }: FlowConfigurationProps) {
 
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [selectOpen, setSelectOpen] = React.useState(false);
+  const [createdUnits, setCreatedUnits] = React.useState<Unit[]>([]);
 
-React.useEffect(() => {
-  if (!listRef.current) return;
 
-  const sortable = SortableJS.create(listRef.current, {
-    animation: 150,
-    ghostClass: "bg-gray-200/50",
-    handle: ".drag-handle",
-    onEnd: (evt) => {
-      const newList = [...nodesList];
-      const [movedItem] = newList.splice(evt.oldIndex!, 1);
-      newList.splice(evt.newIndex!, 0, movedItem);
+  const combinedUnits = [...units, ...createdUnits];
 
-      onNodesChange(newList);
-    },
-  });
+  const handleCriarUnit = (novo: Unit) => {
+    setCreatedUnits((prev) => [...prev, novo]);
+    onHolderChange(novo.id!.toString());
+  };
 
-  return () => sortable.destroy();
-}, [listRef, nodesList, onNodesChange]);
+  const handleAbrirDialog = () => {
+    setSelectOpen(false);
+    setTimeout(() => setOpenDialog(true), 0);
+  };
+
+
+  React.useEffect(() => {
+    if (!listRef.current) return;
+
+    const sortable = SortableJS.create(listRef.current, {
+      animation: 150,
+      ghostClass: "bg-gray-200/50",
+      handle: ".drag-handle",
+      onEnd: (evt) => {
+        const newList = [...nodesList];
+        const [movedItem] = newList.splice(evt.oldIndex!, 1);
+        newList.splice(evt.newIndex!, 0, movedItem);
+
+        onNodesChange(newList);
+      },
+    });
+
+    return () => sortable.destroy();
+  }, [listRef, nodesList, onNodesChange]);
 
 
 
@@ -81,22 +101,34 @@ React.useEffect(() => {
             <Label htmlFor="holder" className="text-xs font-medium">
               Holder
             </Label>
-            <Select key={selectKey} value={holder} onValueChange={onHolderChange}>
+            <Select
+              key={selectKey}
+              value={holder || ""}
+              onValueChange={(val) => onHolderChange(val || undefined)} // envia pro pai
+              open={selectOpen}
+              onOpenChange={setSelectOpen}
+            >
               <SelectTrigger className="w-full min-w-[150px] max-w-[150px]">
-                <SelectValue
-                  placeholder={
-                    isLoadingUnits ? "Carregando Units..." : "Selecionar Unit"
-                  }
-                />
+                <SelectValue placeholder={isLoadingUnits ? "Carregando Units..." : "Selecionar Unit"} />
               </SelectTrigger>
               <SelectContent className="w-full min-w-[150px] max-w-[150px]">
-                {unitsError && (
-                  <span className="text-red-500 text-xs">{unitsError.message}</span>
-                )}
+                <button
+                  type="button"
+                  onClick={handleAbrirDialog}
+                  onMouseDown={(e) => e.preventDefault()}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer text-blue-600 hover:bg-gray-100 rounded-md"
+                >
+                  <Plus className="w-4 h-4" />
+                  Criar novo Unit
+                </button>
+
+                <SelectSeparator />
+
+                {unitsError && <span className="text-red-500 text-xs">{unitsError.message}</span>}
                 {isLoadingUnits && <span className="text-xs">Carregando...</span>}
                 {!isLoadingUnits &&
-                  units.map((unit: Unit) => (
-                    <SelectItem key={unit.id} value={unit.name}>
+                  combinedUnits.map((unit) => (
+                    <SelectItem key={unit.id} value={unit.id!.toString()}>
                       {unit.name}
                     </SelectItem>
                   ))}
@@ -115,7 +147,10 @@ React.useEffect(() => {
               id="pareceres"
               type="number"
               value={pareceres}
-              onChange={(e) => onPareceresChange(Number(e.target.value))}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                onPareceresChange(val);
+              }}
               placeholder="0-5"
               min={0}
               max={5}
@@ -141,18 +176,28 @@ React.useEffect(() => {
         <div ref={listRef} className="flex flex-col gap-1">
           {nodesList.map((node) => (
             <div
-              key={node.id}
+              key={node.key} // usa key (único no array), não node.id
               className="flex items-center justify-between text-xs cursor-default"
             >
               <span className="overflow-hidden whitespace-nowrap text-ellipsis">
-                {node.holder} - {node.parecer} parecer
-                {node.parecer === 1 ? "" : "es"}
+                {node.holder} - {node.parecer} parecer{node.parecer === 1 ? "" : "es"}
               </span>
               <GripVertical className="drag-handle w-4 h-4 text-gray-500 cursor-grab hover:cursor-grab" />
             </div>
           ))}
         </div>
+
       </div>
+      <CriarUnitDialog
+        open={openDialog}
+        onOpenChange={(open) => {
+          setOpenDialog(open);
+          if (!open) {
+            setSelectOpen(false);
+          }
+        }}
+        onCriar={handleCriarUnit}
+      />
     </>
   );
 }
