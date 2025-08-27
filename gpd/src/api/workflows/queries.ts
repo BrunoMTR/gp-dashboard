@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import { getWorkflowById, getAllWorkflows, getFlowById } from '../../services/worklows.service'
 
+
 export function useGetWorkflowByIdOptions(id: number) {
   return queryOptions({
     queryKey: ['workflow', id],
@@ -19,9 +20,10 @@ export function useGetFlowByIdOptions(id: number | null) {
   });
 }
 
+
 export function useGetAllWorkflowsOptions(){
   return queryOptions({
-    queryKey:['workflows'],
+    queryKey:['workflows'] as const,
     queryFn: () => getAllWorkflows(),
     staleTime: 5 * 60 * 1000
   })

@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useGetAllWorkflowsOptions, useGetFlowByIdOptions } from '@/api/workflows/queries'
 import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
@@ -10,6 +10,8 @@ import type { Workflow } from '@/api/workflows/types'
 import { ModalInfo } from '@/components/workflows/modalInfo'
 import { Form } from '@/components/workflows/form'
 import { useWorkflowState } from '@/store/workflowStore'
+import { useSelectedWorkflowFromSearch } from '@/hook/useSelectedWorkflowFromSearch'
+
 
 export const Route = createFileRoute('/workflow')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -19,40 +21,31 @@ export const Route = createFileRoute('/workflow')({
 })
 
 function WorkflowPage() {
-  const search = useSearch({ from: '/workflow' }) 
+  useSelectedWorkflowFromSearch()
   const router = useRouter()
-
   const selectedItem = useWorkflowState((state) => state.selectedItem)
-  const setSelectedItem = useWorkflowState((state) => state.setSelectedItem)
+  const [uiState, setUiState] = React.useState({
+    isSheetOpen: false,
+    isModalOpen: false,
+    isFormOpen: false,
+  })
 
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const [selectedWorkflow, setSelectedWorkflow] = React.useState<Workflow | null>(null)
-  const [isModalOpen, setIsModalOpen] = React.useState(false)
-  const [isFormOpen, setIsFormOpen] = React.useState(false)
-
-  const { data: workflowsData = [], isLoading: isLoadingWorkflows, error: workflowsError } =
-    useQuery(useGetAllWorkflowsOptions())
+  const
+    {
+      data: workflowsData = [],
+      isLoading: isLoadingWorkflows,
+      error: workflowsError
+    } = useQuery(useGetAllWorkflowsOptions())
 
   const { data: flowData = null } = useQuery(
-    useGetFlowByIdOptions(selectedWorkflow?.id ?? 0)
+    useGetFlowByIdOptions(selectedItem ?? 0)
   )
 
-React.useEffect(() => {
-    if (search.selected !== undefined) {
-      setSelectedItem(search.selected)
-    }
-  }, [search.selected])
-
-  React.useEffect(() => {
-    if (selectedItem !== 0 && workflowsData.length > 0) {
-      const wf = workflowsData.find((w) => w.id === selectedItem)
-      if (wf) setSelectedWorkflow(wf)
-    }
+  const selectedWorkflow = React.useMemo(() => {
+    return workflowsData.find((w) => w.id === selectedItem) ?? null
   }, [selectedItem, workflowsData])
 
-  
   const handleSelectWorkflow = (wf: Workflow) => {
-    setSelectedWorkflow(wf)
     router.navigate({
       to: '/workflow',
       search: { selected: wf.id },
@@ -60,21 +53,25 @@ React.useEffect(() => {
     })
   }
 
+  const toggleUi = (key: keyof typeof uiState, value: boolean) => {
+    setUiState((prev) => ({ ...prev, [key]: value }))
+  }
+
   return (
     <div className="p-4">
       <Menu
-        onOpenSheet={() => setIsSheetOpen(true)}
-        onOpenModal={() => setIsModalOpen(true)}
+        onOpenSheet={() => toggleUi('isSheetOpen', true)}
+        onOpenModal={() => toggleUi('isModalOpen', true)}
+        onOpenForm={() => toggleUi('isFormOpen', true)}
         workflow={selectedWorkflow}
-        onOpenForm={() => setIsFormOpen(true)}
       />
 
-      <ModalInfo open={isModalOpen} setOpen={setIsModalOpen} workflow={selectedWorkflow} />
-      <Form open={isFormOpen} setOpen={setIsFormOpen} />
+      <ModalInfo open={uiState.isModalOpen} setOpen={(v) => toggleUi('isModalOpen', v)} workflow={selectedWorkflow} />
+      <Form open={uiState.isFormOpen} setOpen={(v) => toggleUi('isFormOpen', v)} />
 
       <Sidebar
-        open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
+        open={uiState.isSheetOpen}
+        onOpenChange={(v) => toggleUi('isSheetOpen', v)}
         isLoading={isLoadingWorkflows}
         error={workflowsError as Error | null}
         data={workflowsData}
