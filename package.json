@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@tanstack/react-router-devtools": "^1.130.8"
+    "@tanstack/react-router-devtools": "^1.130.8",
+    "zustand": "^5.0.8"
   }
 }

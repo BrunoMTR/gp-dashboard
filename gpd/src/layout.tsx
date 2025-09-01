@@ -6,6 +6,8 @@ import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import { GlobalLoader } from "./components/global-loader";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
+
 
 export default function Layout() {
   return (
@@ -31,6 +33,7 @@ export default function Layout() {
               </div>
             </div>
             <Outlet />
+            <Toaster position="bottom-left" />
           </main>
         </div>
       </SidebarProvider>

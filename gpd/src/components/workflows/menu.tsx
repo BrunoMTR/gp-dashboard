@@ -1,4 +1,5 @@
 import type { Workflow } from "@/api/workflows/types"
+import  {Alert} from '../workflows/AlertDialog'
 import {
   Menubar,
   MenubarContent,
@@ -8,6 +9,11 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar"
+import { useState } from "react"
+
+
+
+
 
 interface MenuProps {
   onOpenSheet: () => void
@@ -17,7 +23,8 @@ interface MenuProps {
 }
 
 export function Menu({ onOpenSheet, onOpenModal, onOpenForm, workflow }: MenuProps) {
-const hasWorkflowData = Boolean(workflow && Object.keys(workflow).length > 0)
+  const hasWorkflowData = Boolean(workflow && Object.keys(workflow).length > 0)
+  const [open, setOpen] = useState(false);
   return (
     <div className="w-auto mb-4">
       <Menubar>
@@ -36,14 +43,18 @@ const hasWorkflowData = Boolean(workflow && Object.keys(workflow).length > 0)
           <MenubarTrigger>Workflow</MenubarTrigger>
           <MenubarContent>
             <MenubarItem onSelect={onOpenModal} disabled={!hasWorkflowData}>Atualizar dados</MenubarItem>
-            <MenubarItem disabled={!hasWorkflowData}>Bloquear</MenubarItem>
-            <MenubarItem onSelect={onOpenForm}>Registrar</MenubarItem>
-            <MenubarItem disabled={!hasWorkflowData}>Remover</MenubarItem>
+            <MenubarItem disabled={!hasWorkflowData} onSelect={() => setOpen(true) }>Remover</MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={onOpenSheet}>Ver outros</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
+      <Alert
+        title="Apagar aplicação"
+        message="Tens a certeza que queres apagar esta aplicação?"
+        open={open}
+        onOpenChange={setOpen}
+      />
     </div>
   )
 }

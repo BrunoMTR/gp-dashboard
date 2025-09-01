@@ -33,3 +33,8 @@ export interface Flow {
     approvals: number;
   }[];
 }
+
+export interface node{
+  id: number;
+  approvals: number;
+}

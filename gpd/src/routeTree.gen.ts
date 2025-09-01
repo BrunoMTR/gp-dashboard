@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkflowRouteImport } from './routes/workflow'
+import { Route as ProcessesRouteImport } from './routes/processes'
 import { Route as NewWorkflowRouteImport } from './routes/new-workflow'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WorkflowRoute = WorkflowRouteImport.update({
   id: '/workflow',
   path: '/workflow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessesRoute = ProcessesRouteImport.update({
+  id: '/processes',
+  path: '/processes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewWorkflowRoute = NewWorkflowRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
+  '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
+  '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
+  '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/new-workflow' | '/workflow'
+  fullPaths: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/new-workflow' | '/workflow'
-  id: '__root__' | '/' | '/about' | '/new-workflow' | '/workflow'
+  to: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
+  id: '__root__' | '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   NewWorkflowRoute: typeof NewWorkflowRoute
+  ProcessesRoute: typeof ProcessesRoute
   WorkflowRoute: typeof WorkflowRoute
 }
 
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/workflow'
       fullPath: '/workflow'
       preLoaderRoute: typeof WorkflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/processes': {
+      id: '/processes'
+      path: '/processes'
+      fullPath: '/processes'
+      preLoaderRoute: typeof ProcessesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/new-workflow': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   NewWorkflowRoute: NewWorkflowRoute,
+  ProcessesRoute: ProcessesRoute,
   WorkflowRoute: WorkflowRoute,
 }
 export const routeTree = rootRouteImport
