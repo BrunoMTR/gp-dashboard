@@ -23,12 +23,9 @@ export const Route = createFileRoute('/workflow')({
 function WorkflowPage() {
   useSelectedWorkflowFromSearch()
   const router = useRouter()
-  const selectedItem = useWorkflowState((state) => state.selectedItem)
-  const [uiState, setUiState] = React.useState({
-    isSheetOpen: false,
-    isModalOpen: false,
-    isFormOpen: false,
-  })
+  const { selectedItem, isSheetOpen, isModalOpen, isFormOpen, setSelectedItem, toggleSheet, toggleModal, toggleForm } =
+    useWorkflowState();
+
 
   const
     {
@@ -37,47 +34,53 @@ function WorkflowPage() {
       error: workflowsError
     } = useQuery(useGetAllWorkflowsOptions())
 
-  const { data: flowData = null } = useQuery(
-    useGetFlowByIdOptions(selectedItem ?? 0)
-  )
+
+  const { data: flowData = null } = useQuery({
+    ...useGetFlowByIdOptions(selectedItem ?? 0),
+    enabled: !!selectedItem,
+  });
 
   const selectedWorkflow = React.useMemo(() => {
     return workflowsData.find((w) => w.id === selectedItem) ?? null
   }, [selectedItem, workflowsData])
 
-  const handleSelectWorkflow = (wf: Workflow) => {
-    router.navigate({
-      to: '/workflow',
-      search: { selected: wf.id },
-      replace: true,
-    })
+
+  const handleSelectWorkflow = React.useCallback(
+    (wf: Workflow) => {
+      setSelectedItem(wf.id);
+      router.navigate({
+        to: '/workflow',
+        search: { selected: wf.id },
+        replace: true,
+      });
+    },
+    [router, setSelectedItem]
+  );
+
+  if (isLoadingWorkflows) {
+    return <div>Loading workflows...</div>;
   }
 
-  const toggleUi = (key: keyof typeof uiState, value: boolean) => {
-    setUiState((prev) => ({ ...prev, [key]: value }))
-  }
 
   return (
     <div className="p-4">
       <Menu
-        onOpenSheet={() => toggleUi('isSheetOpen', true)}
-        onOpenModal={() => toggleUi('isModalOpen', true)}
-        onOpenForm={() => toggleUi('isFormOpen', true)}
+        onOpenSheet={() => toggleSheet(true)}
+        onOpenModal={() => toggleModal(true)}
+        onOpenForm={() => toggleForm(true)}
         workflow={selectedWorkflow}
       />
 
-      <ModalInfo open={uiState.isModalOpen} setOpen={(v) => toggleUi('isModalOpen', v)} workflow={selectedWorkflow} />
-      <Form open={uiState.isFormOpen} setOpen={(v) => toggleUi('isFormOpen', v)} />
-
+      <ModalInfo open={isModalOpen} setOpen={toggleModal} workflow={selectedWorkflow} />
+      <Form open={isFormOpen} setOpen={toggleForm} />
       <Sidebar
-        open={uiState.isSheetOpen}
-        onOpenChange={(v) => toggleUi('isSheetOpen', v)}
+        open={isSheetOpen}
+        onOpenChange={toggleSheet}
         isLoading={isLoadingWorkflows}
         error={workflowsError as Error | null}
         data={workflowsData}
         onSelectWorkflow={handleSelectWorkflow}
       />
-
       <Flow data={flowData} />
       <WorkflowPopover workflow={selectedWorkflow} />
     </div>
