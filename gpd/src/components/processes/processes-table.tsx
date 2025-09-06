@@ -1,92 +1,178 @@
-"use client"
-
-import * as React from "react"
+// components/ProcessesTable.tsx
+import * as React from "react";
 import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { StatusBadge, type Status } from "./StatusBadge";
+import { ProcessFlow, type Node, type Edge } from "./ProcessFlow";
 
 export type Process = {
-  id: string
-  createdAt: string
-  createdBy: string
-  at: string
-  workflows: string
+  id: string;
+  createdAt: string;
+  createdBy: string;
+  at: string;
+  workflows: string;
+  status: Status;
+  nodes: Node[];
+  edges: Edge[];
+};
+
+interface ProcessesTableProps {
+  data: Process[];
 }
 
-// 🔹 Função para simular carregamento de mais dados
-function generateMoreData(start: number, count: number): Process[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: (start + i + 1).toString(),
-    createdAt: new Date().toISOString(),
-    createdBy: `User ${start + i + 1}`,
-    at: `Server-${(start + i + 1).toString().padStart(2, "0")}`,
-    workflows: `Workflow ${String.fromCharCode(65 + ((start + i) % 26))}`,
-  }))
-}
+export function ProcessesTable({ data }: ProcessesTableProps) {
+  const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
+  const [search, setSearch] = React.useState("");
+  const [appFilter, setAppFilter] = React.useState("all");
+  const [dateFilter, setDateFilter] = React.useState("all");
+  const [page, setPage] = React.useState(0);
+  const pageSize = 10;
 
-export const columns: ColumnDef<Process>[] = [
-  { accessorKey: "id", header: "ID" },
-  { accessorKey: "createdAt", header: "Created At" },
-  { accessorKey: "createdBy", header: "Created By" },
-  { accessorKey: "at", header: "At" },
-  { accessorKey: "workflows", header: "Workflows" },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const process = row.original
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => alert(`Visualizar processo ${process.id}`)}
-        >
-          View
-        </Button>
-      )
+  const filteredData = React.useMemo(() => {
+    return data.filter((item) => {
+      const matchesSearch =
+        search === "" ||
+        item.id.includes(search) ||
+        item.createdBy.toLowerCase().includes(search.toLowerCase()) ||
+        item.workflows.toLowerCase().includes(search.toLowerCase());
+
+      const matchesApp = appFilter === "all" || item.at === appFilter;
+
+      const matchesDate =
+        dateFilter === "all" ||
+        (dateFilter === "last7" &&
+          new Date(item.createdAt) >= new Date(Date.now() - 7 * 86400000)) ||
+        (dateFilter === "last30" &&
+          new Date(item.createdAt) >= new Date(Date.now() - 30 * 86400000));
+
+      return matchesSearch && matchesApp && matchesDate;
+    });
+  }, [data, search, appFilter, dateFilter]);
+
+  const paginatedData = React.useMemo(() => {
+    const start = page * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, page]);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  const columns: ColumnDef<Process>[] = [
+    {
+      id: "expander",
+      cell: ({ row }) => {
+        const process = row.original;
+        const isExpanded = expandedRow === process.id;
+
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpandedRow(isExpanded ? null : process.id)}
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        );
+      },
     },
-  },
-]
+    { accessorKey: "id", header: "ID" },
+    { accessorKey: "createdAt", header: "Created At" },
+    { accessorKey: "createdBy", header: "Created By" },
+    { accessorKey: "at", header: "At" },
+    { accessorKey: "workflows", header: "Workflows" },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
+  ];
 
-export function ProcessesTable() {
-  const [data, setData] = React.useState<Process[]>(() => generateMoreData(0, 20))
   const table = useReactTable({
-    data,
+    data: paginatedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
-
-  // 🔹 Detecta scroll no container
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    const handleScroll = () => {
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
-        // Carregar mais dados quando chega perto do fundo
-        setData((prev) => [...prev, ...generateMoreData(prev.length, 20)])
-      }
-    }
-
-    el.addEventListener("scroll", handleScroll)
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [])
+  });
 
   return (
-    <div ref={containerRef} className="w-full h-full overflow-y-auto rounded-md border">
+    <div className="w-full rounded-md border p-4 space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4">
+        <Input
+          placeholder="Pesquisar..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
+          className="max-w-xs"
+        />
+        <Select
+          value={appFilter}
+          onValueChange={(v) => {
+            setAppFilter(v);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Aplicação" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas</SelectItem>
+            <SelectItem value="App-1">App-1</SelectItem>
+            <SelectItem value="App-2">App-2</SelectItem>
+            <SelectItem value="App-3">App-3</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={dateFilter}
+          onValueChange={(v) => {
+            setDateFilter(v);
+            setPage(0);
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Data" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as datas</SelectItem>
+            <SelectItem value="last7">Últimos 7 dias</SelectItem>
+            <SelectItem value="last30">Últimos 30 dias</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Table */}
       <Table>
-        {/* 🔹 Cabeçalho fixo */}
-        <TableHeader className="sticky top-0  shadow z-10">
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className="font-semibold">
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -95,28 +181,72 @@ export function ProcessesTable() {
             </TableRow>
           ))}
         </TableHeader>
-
-        {/* 🔹 Corpo com scroll infinito */}
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
+            table.getRowModel().rows.map((row) => {
+              const process = row.original;
+              const isExpanded = expandedRow === process.id;
+
+              return (
+                <React.Fragment key={row.id}>
+                  <TableRow>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {isExpanded && (
+                    <TableRow>
+                      <TableCell colSpan={columns.length}>
+                        <div className="p-4 border rounded-md bg-muted/30">
+                          <p className="text-sm text-muted-foreground">
+                            Fluxo detalhado do processo {process.id}
+                          </p>
+                          <div className="mt-2 h-80 border rounded-md bg-background">
+                            <ProcessFlow nodes={process.nodes} edges={process.edges} />
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                Nenhum resultado encontrado.
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-muted-foreground">
+          Página {page + 1} de {totalPages || 1}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 0}
+            onClick={() => setPage((p) => Math.max(p - 1, 0))}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
+          >
+            Próxima
+          </Button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

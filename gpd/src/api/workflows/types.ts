@@ -1,20 +1,44 @@
-
 import type { Node, Edge } from '@xyflow/react'
+
+
+
 export interface Workflow {
-  id: number;
-  name: string;
-  abbreviation: string;
-  team: string;
-  teamEmail: string;
-  applicationEmail: string;
+  application: {
+    name: string;
+    abbreviation: string;
+    team: string;
+    teamEmail: string;
+    applicationEmail: string;
+  };
+  graph: {
+    nodes: {
+      originId: number;
+      destinationId: number;
+      approvals: number;
+      direction: string; // "AVANÇO" ou "RECUO"
+    }[];
+  };
 }
 
-export interface WorkflowInput {
-  name: string;
-  abbreviation: string;
-  team: string;
-  teamEmail: string;
-  applicationEmail: string;
+
+export interface WorkflowResponse{
+  application:{
+    id: number,  
+    name: string,
+    abbreviation: string,
+    team: string,
+    teamEmail: string,
+    applicationEmail: string,
+  }
+  graph:{
+    nodes: [
+        id: number,
+        originId: number,
+        destinationId: number,
+        approvals: number,
+        direction: number,
+    ]
+  }
 }
 
 
@@ -37,4 +61,12 @@ export interface Flow {
 export interface node{
   id: number;
   approvals: number;
+}
+
+export interface WorkflowApplication {
+  name: string;
+  abbreviation: string;
+  team: string;
+  teamEmail: string;
+  applicationEmail: string;
 }

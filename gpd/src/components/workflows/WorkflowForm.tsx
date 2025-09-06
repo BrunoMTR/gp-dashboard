@@ -1,9 +1,9 @@
 import { Input } from "@/components/ui/input";
-import type { WorkflowInput } from "@/api/workflows/types";
+import type { WorkflowApplication} from "@/api/workflows/types";
 
 interface Props {
-  value: WorkflowInput;
-  onChange: (value: WorkflowInput) => void;
+  value: WorkflowApplication;
+  onChange: (value: WorkflowApplication) => void;
 }
 
 export function WorkflowForm({ value, onChange }: Props) {
@@ -15,6 +15,7 @@ export function WorkflowForm({ value, onChange }: Props) {
           placeholder="Nome"
           maxLength={50}
           className="flex-1"
+          value={value.name}
           onChange={(e) => onChange({ ...value, name: e.target.value })}
         />
         <Input
@@ -22,6 +23,7 @@ export function WorkflowForm({ value, onChange }: Props) {
           placeholder="Abreviação"
           maxLength={15}
           className="w-28"
+          value={value.abbreviation}
           onChange={(e) => onChange({ ...value, abbreviation: e.target.value })}
         />
       </div>
@@ -30,6 +32,7 @@ export function WorkflowForm({ value, onChange }: Props) {
         type="email"
         placeholder="Application Email"
         className="w-full"
+        value={value.applicationEmail}
         onChange={(e) => onChange({ ...value, applicationEmail: e.target.value })}
       />
 
@@ -38,12 +41,14 @@ export function WorkflowForm({ value, onChange }: Props) {
           type="text"
           placeholder="Team"
           className="flex-1"
+          value={value.team}
           onChange={(e) => onChange({ ...value, team: e.target.value })}
         />
         <Input
           type="email"
           placeholder="Team Email"
           className="flex-1"
+          value={value.teamEmail}
           onChange={(e) => onChange({ ...value, teamEmail: e.target.value })}
         />
       </div>

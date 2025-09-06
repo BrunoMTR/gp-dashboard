@@ -1,19 +1,16 @@
 import * as React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCreateWorkflow, useCreateFlow } from "../../api/workflows/mutations";
+import { useCreateW } from "../../api/workflows/mutations";
 import { useGetUnitsOptions } from '../../api/units/queries'
 import { useQuery } from "@tanstack/react-query";
-import type { Flow, WorkflowInput } from "@/api/workflows/types";
+import type { Workflow } from "@/api/workflows/types";
 import { WorkflowForm } from "./WorkflowForm";
 import { FlowConfiguration } from "./FlowConfigurator";
 import type { NodeItem } from "./types";
 import { WorkflowAlerts } from "./WorkflowAlerts";
 import { toast } from "sonner";
 import { WorkflowErrorAlert } from "./WorkflowErrorAlert";
-
-
-
 
 
 interface WorkflowConfigurationProps {
@@ -26,7 +23,7 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   const [pareceres, setPareceres] = React.useState<number>(0);
   const [nodesList, setNodesList] = React.useState<NodeItem[]>([]);
   const [selectKey, setSelectKey] = React.useState<number>(0);
-  const [alertMessage, setAlertMessage] = React.useState<string>("");
+
 
 
   const idCounter = React.useRef(0);
@@ -35,41 +32,30 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   const { data: unitsData = [], isLoading: isLoadingUnits, error: unitsError } =
     useQuery(useGetUnitsOptions())
 
-  const { mutate: mutateFlow } = useCreateFlow();
-
-  const { mutate: mutateWorkflow, isPending, isError, isSuccess } = useCreateWorkflow(
-    (workflowCriado) => {
-      const flowPayload: Flow = {
-        applicationId: workflowCriado.id,
-        nodes: nodesList.map((n, index, arr) => {
-          if (index === arr.length - 1) return null;
-          return {
-            originId: n.id,
-            destinationId: arr[index + 1].id,
-            approvals: n.parecer,
-          };
-        }).filter(Boolean) as Flow["nodes"],
-      };
 
 
-      mutateFlow(flowPayload);
-    }
-  );
+  const { mutate: mutateWorkflow, isPending, isError, isSuccess } = useCreateW();
 
 
-  const [workflow, setWorkflow] = React.useState<WorkflowInput>({
-    name: "",
-    abbreviation: "",
-    applicationEmail: "",
-    team: "",
-    teamEmail: "",
+
+  const [workflow, setWorkflow] = React.useState<Workflow>({
+    application: {
+      name: "",
+      abbreviation: "",
+      applicationEmail: "",
+      team: "",
+      teamEmail: "",
+    },
+    graph: { nodes: [] },
   });
+
 
   const handleSave = () => {
     if (nodesList.length === 0) {
       WorkflowErrorAlert("Adicione pelo menos um node antes de salvar.");
       return;
     }
+
 
     // Valida pareceres
     for (let i = 0; i < nodesList.length; i++) {
@@ -90,12 +76,35 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
     // Valida último node != primeiro node (se houver mais de 1)
     if (nodesList.length > 1 && nodesList[0].id === nodesList[nodesList.length - 1].id) {
       WorkflowErrorAlert("O último node não pode ser igual ao primeiro.");
-    
+
       return;
     }
 
-    // Se passou todas as validações, salva
-    mutateWorkflow({ ...workflow });
+
+    const nodesPayload = nodesList.map((node, index) => ({
+      originId: node.id,
+      destinationId: index < nodesList.length - 1
+        ? nodesList[index + 1].id   // aponta para o próximo node
+        : nodesList[0].id,          // último node aponta para o primeiro
+      approvals: node.parecer,
+      direction: "AVANÇO",          // ou "RECUO" se precisar de lógica diferente
+    }));
+
+    // Atualiza workflow
+    const wPayload: Workflow = {
+      application: workflow.application,
+      graph: { nodes: nodesPayload },
+    };
+
+    mutateWorkflow(wPayload, {
+      onSuccess: () => {
+        toast.success("Workflow criado com sucesso!");
+        handleLimpar();
+      },
+      onError: (err: any) => {
+        WorkflowErrorAlert("Erro ao criar workflow: " + err?.message || "Erro desconhecido");
+      },
+    });
   };
 
 
@@ -164,7 +173,15 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
 
 
       <CardContent className="flex-1 overflow-y-auto px-4 flex flex-col gap-4">
-        <WorkflowForm value={workflow} onChange={setWorkflow} />
+        <WorkflowForm
+          value={workflow.application}
+          onChange={(newApplication) =>
+            setWorkflow((prev: any) => ({
+              ...prev,
+              application: newApplication,
+            }))
+          }
+        />
 
         <FlowConfiguration
           units={unitsData}
