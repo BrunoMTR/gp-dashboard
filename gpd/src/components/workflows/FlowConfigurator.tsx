@@ -90,7 +90,7 @@ export function FlowConfiguration({
 
   return (
     <>
-      <div>
+      <div className="p-2">
         <h2 className="text-sm font-semibold mb-0.5">Configuração do Flow</h2>
         <p className="text-xs text-gray-600 mb-2">
           Selecione o holder e indique o número de pareceres necessários.

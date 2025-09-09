@@ -68,7 +68,7 @@ export function DataTable<TData, TValue>({ columns, data, isLoading, onRowClick 
                  !isLoading && (
                   <TableRow>
                     <TableCell colSpan={columns.length} className="text-center py-10">
-                      Sem resultados.
+                      SEM RESULTADOS.
                     </TableCell>
                   </TableRow>
                 )

@@ -2,8 +2,6 @@ import {
     ReactFlow,
     applyNodeChanges,
     applyEdgeChanges,
-    addEdge,
-    MiniMap,
     type Node,
     type Edge,
     type NodeChange,
@@ -13,15 +11,10 @@ import {
 } from '@xyflow/react';
 import { useState, useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
-import { DepartmentNode } from './department-node';
-import { getLayoutedElements } from './layout';
-
-
-import { Button } from "@/components/ui/button"
-
+import type { NodeItem } from './types';
+import React from 'react';
 
 const proOptions = { hideAttribution: true };
-
 
 interface Data {
     nodes: Node[];
@@ -30,69 +23,86 @@ interface Data {
 
 interface FlowProps {
     data: Data | null;
+    onNodesChange?: (nodesList: NodeItem[]) => void;
 }
-const nodeTypes = {
-    department: DepartmentNode, // "department" será o tipo usado no node
-};
 
-export function Flow({ data }: FlowProps) {
-    if (!data) {
-        return null;
-    }
+export function Flow({ data, onNodesChange }: FlowProps) {
+    const [nodes, setNodes] = useState<Node[]>(data?.nodes || []);
+    const [edges, setEdges] = useState<Edge[]>(data?.edges || []);
 
-    const [nodes, setNodes] = useState<Node[]>(data.nodes);
-    const [edges, setEdges] = useState<Edge[]>(data.edges);
-
-    const onNodesChange = useCallback(
-        (changes: NodeChange[]) =>
-            setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
-        []
-    );
-
-    const onEdgesChange = useCallback(
-        (changes: EdgeChange[]) =>
-            setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
-        []
-    );
-
-    const onConnect = useCallback(
-        (params: any) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
-        []
-    );
-
-    const onLayout = useCallback(
-        (direction: 'TB' | 'LR') => {
-            const layouted = getLayoutedElements(nodes, edges, direction);
-            setNodes([...layouted.nodes]);
-            setEdges([...layouted.edges]);
+    const onNodesChangeHandler = useCallback(
+        (changes: NodeChange[]) => {
+            setNodes((nds) => applyNodeChanges(changes, nds));
         },
-        [nodes, edges]
+        []
+    );
+
+    const onEdgesChangeHandler = useCallback(
+        (changes: EdgeChange[]) => {
+            setEdges((eds) => applyEdgeChanges(changes, eds));
+        },
+        []
+    );
+
+    // Sempre que data mudar, atualiza nodes e edges
+    React.useEffect(() => {
+        if (data) {
+            setNodes(data.nodes);
+            setEdges(data.edges);
+        }
+    }, [data]);
+
+    // Exemplo de função para atualizar nodes via configuração
+    const handleFlowConfigChange = useCallback(
+        (nodesList: NodeItem[]) => {
+            const reactFlowNodes: Node[] = nodesList.map((item, index) => ({
+                id: item.key.toString(),
+                type: "department",
+                data: { label: item.holder },
+                position: { x: 50, y: index * 80 },
+            }));
+
+            const reactFlowEdges: Edge[] = nodesList.slice(1).map((item, index) => ({
+                id: `edge-${nodesList[index].key}-${item.key}`,
+                source: nodesList[index].key.toString(),
+                target: item.key.toString(),
+                label: nodesList[index].parecer.toString(),
+            }));
+
+            setNodes(reactFlowNodes);
+            setEdges(reactFlowEdges);
+
+            if (onNodesChange) onNodesChange(nodesList);
+        },
+        [onNodesChange]
     );
 
     return (
         <div className="flex-1 flex items-center justify-center border rounded-lg p-4 bg-muted/10">
-            <div style={{ width: '75vw', height: '65vh' }}>
+            <div style={{ width: '75vw', height: '72vh' }}>
                 <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
+                    nodes={nodes.map((node) => ({
+                        ...node,
+                        style: {
+                            backgroundColor: "#26adbeff",
+                            color: "white",
+                            padding: 10,
+                            borderRadius: 6,
+                        },
+                    }))}
+                    edges={edges.map((edge) => ({
+                        ...edge,
+                        type: "step",
+                        animated: true,
+                        style: { strokeWidth: 2, stroke: "#bfd0f5ff" },
+                    }))}
+                    onNodesChange={onNodesChangeHandler}
+                    onEdgesChange={onEdgesChangeHandler}
+                    nodesDraggable={true}
                     proOptions={proOptions}
-                    nodeTypes={nodeTypes}
+                    fitView
                 >
-                    <MiniMap />
                     <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-
-                    <div className="absolute top-2 right-2 z-10 flex flex-col space-y-2">
-                        <Button variant="outline" onClick={() => onLayout('TB')}>
-                            V
-                        </Button>
-                        <Button variant="outline" onClick={() => onLayout('LR')}>
-                            H
-                        </Button>
-                    </div>
-
                 </ReactFlow>
             </div>
         </div>

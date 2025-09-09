@@ -10,35 +10,10 @@ import {
   type Node as FlowNode,
   type Edge as FlowEdge,
 } from "@xyflow/react";
-import { DepartmentNode } from "../workflows/department-node";
+import type { Flow } from "@/api/processes/types";
 
-const nodeTypes = { department: DepartmentNode };
 
-export type NodeData = {
-  label: string;
-  status: "pending" | "visited" | "current";
-};
-
-export type Node = {
-  id: string;
-  position: { x: number; y: number };
-  data: NodeData;
-  type: string;
-};
-
-export type Edge = {
-  id: string;
-  source: string;
-  target: string;
-  label: string;
-};
-
-interface ProcessFlowProps {
-  nodes: Node[];
-  edges: Edge[];
-}
-
-export function ProcessFlow({ nodes: initialNodes, edges: initialEdges }: ProcessFlowProps) {
+export function Flow({ nodes: initialNodes, edges: initialEdges }: Flow) {
   const [nodes, setNodes] = React.useState<FlowNode[]>(initialNodes);
   const [edges, setEdges] = React.useState<FlowEdge[]>(initialEdges);
 
@@ -77,7 +52,6 @@ export function ProcessFlow({ nodes: initialNodes, edges: initialEdges }: Proces
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodesDraggable={true}
-      nodeTypes={nodeTypes}
       fitView
     >
       <Background />

@@ -2,15 +2,18 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DataTable } from "../workflows/data-table"
 import { columns } from "../workflows/columns"
-import { type Workflow } from "@/api/workflows/types"
+import { type Application } from "@/api/workflows/types"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import { useErrorMessage } from "../../hook/useErrorMessage"
 
 interface SidebarProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     isLoading: boolean
     error?: Error | null
-    data: Workflow[]
-    onSelectWorkflow: (workflow: Workflow) => void
+    data: Application[]
+    onSelectApplication: (application: Application) => void
 }
 
 export function Sidebar({
@@ -19,7 +22,7 @@ export function Sidebar({
     isLoading,
     error,
     data,
-    onSelectWorkflow,
+    onSelectApplication: onSelectWorkflow,
 }: SidebarProps) {
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -43,13 +46,22 @@ export function Sidebar({
                             ))}
                         </div>
                     )}
-                    {error && <p>Erro: {error.message}</p>}
+                    {error && (
+                        <Alert variant="destructive" className="max-w-xl">
+                            <AlertCircle className="h-5 w-5" />
+                            <AlertTitle>Erro ao carregar processos</AlertTitle>
+                            <AlertDescription>
+                                {useErrorMessage(error)}
+                            </AlertDescription>
+                        </Alert>
+
+                    )}
                     <DataTable
                         columns={columns}
                         data={data}
                         isLoading={isLoading}
-                        onRowClick={(workflow) => {
-                            onSelectWorkflow(workflow)
+                        onRowClick={(application) => {
+                            onSelectWorkflow(application)
                             onOpenChange(false)
                         }}
                     />

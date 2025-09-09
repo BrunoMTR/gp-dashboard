@@ -42,8 +42,10 @@ export function AppSidebar() {
       setSelectedItem(id)
     }
   }
+ 
   return (
     <Sidebar>
+
       <SidebarHeader className="px-4 py-4">
         <div className="flex flex-row items-center">
           <img
@@ -62,6 +64,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        
         <SidebarGroup>
 
           <SidebarGroupContent>
