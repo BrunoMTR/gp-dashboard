@@ -1,12 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { createWorkflow, deleteWorkflow } from "../../../src/services/worklows.service";
-import type {  Application, WorkflowResponse } from "../workflows/types";
+import type {  Workflow, WorkflowResponse } from "../workflows/types";
 
 
 
 export function useCreateWorkflow() {
-  return useMutation<WorkflowResponse, Error, Application>({
-    mutationFn: (data: Application) => createWorkflow(data)
+  return useMutation<WorkflowResponse, Error, Workflow>({
+    mutationFn: (data: Workflow) => createWorkflow(data)
   });
 }
 

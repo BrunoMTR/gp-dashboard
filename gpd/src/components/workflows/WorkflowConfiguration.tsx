@@ -99,7 +99,7 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
       graph: { nodes: nodesPayload },
     };
 
-    mutateWorkflow(wPayload.application, {
+    mutateWorkflow(wPayload, {
       onSuccess: () => {
         toast.success("Workflow criado com sucesso!");
         handleLimpar();

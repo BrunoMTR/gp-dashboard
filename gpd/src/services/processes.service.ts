@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios"
-import type { ProcessFlow } from "../api/processes/types"
+import type { ProcessesApiResponse } from "../api/processes/types"
 
 const PROCESSES_PATH = "/processes"
 
@@ -7,9 +7,9 @@ export async function getAllProcesses(params: {
   pageIndex?: number
   pageSize?: number
   search?: string
-  application?: string
+  applicationId?: number
   dateFilter?: string
-}): Promise<ProcessFlow[]> {
-  const response = await axiosInstance.get(PROCESSES_PATH, { params })
+}): Promise<ProcessesApiResponse> {
+  const response = await axiosInstance.get<ProcessesApiResponse>(PROCESSES_PATH, { params })
   return response.data
 }

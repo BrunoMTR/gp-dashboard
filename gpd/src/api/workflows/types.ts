@@ -50,6 +50,13 @@ export interface FlowData {
   edges: Edge[];
 }
 
+export interface FlowApiResponse {
+  success: boolean;
+  message: string;
+  data: FlowData;
+
+}
+
 export interface WorkflowApplication {
   name: string;
   abbreviation: string;

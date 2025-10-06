@@ -1,11 +1,11 @@
 import axiosInstance from '@/lib/axios'
-import type { FlowData, WorkflowResponse, Application } from '../api/workflows/types'
+import type {WorkflowResponse, Application, FlowApiResponse, Workflow } from '../api/workflows/types'
 
 const APPLICATION_PATH = '/applications'
 const FLOW_PATH = '/flows'
 
 
-export async function createWorkflow(data: Application): Promise<WorkflowResponse> {
+export async function createWorkflow(data: Workflow): Promise<WorkflowResponse> {
   const response = await axiosInstance.post(APPLICATION_PATH, data)
   return response.data
 }
@@ -21,7 +21,7 @@ export async function getWorkflowById(id: number): Promise<Application> {
   return response.data
 }
 
-export async function getFlowById(id: number): Promise<FlowData> {
+export async function getFlowById(id: number): Promise<FlowApiResponse> {
   const response = await axiosInstance.get(`${FLOW_PATH}/${id}`)
   return response.data
 }

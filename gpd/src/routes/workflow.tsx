@@ -75,7 +75,7 @@ function WorkflowPage() {
         data={workflowsData}
         onSelectApplication={handleSelectWorkflow}
       />
-      <Flow data={flowData} />
+      <Flow data={flowData?.data ?? null} />
       <WorkflowPopover application={selectedWorkflow} />
     </div>
   )

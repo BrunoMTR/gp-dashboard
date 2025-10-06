@@ -56,7 +56,14 @@ export interface ProcessFlow {
   unit: Unit;
   nodes: FlowNode[];
   edges: FlowEdge[];
-   processCount: number; 
+  
+}
+
+export interface ProcessesApiResponse {
+  success: boolean;
+  message: string;
+  data: ProcessFlow[];
+  totalCount: number;
 }
 
 

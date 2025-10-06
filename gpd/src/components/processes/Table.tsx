@@ -26,19 +26,22 @@ import {
 import { StatusBadge } from "./StatusBadge";
 import { Flow } from "./Flow";
 import type { ProcessFlow } from "@/api/processes/types";
+import type { Application } from "@/api/workflows/types";
 
 
 interface ProcessesTableProps {
   data: ProcessFlow[];
   search: string;
   setSearch: (v: string) => void;
-  application: string;
-  setApplication: (v: string) => void;
+  application: number;
+  setApplication: (v: number) => void;
   dateFilter: string;
   setDateFilter: (v: string) => void;
   pageIndex: number;
   setPageIndex: (v: number) => void;
   pageSize: number;
+  totalCount: number;
+  workflows: Application[]
 }
 
 export function ProcessesTable({
@@ -52,18 +55,25 @@ export function ProcessesTable({
   pageIndex,
   setPageIndex,
   pageSize,
+  totalCount,
+  workflows,
 }: ProcessesTableProps) {
   const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
 
-  // Lista de workflows únicos para o filtro de App
+
   const workflowOptions = React.useMemo(() => {
-    const unique = new Set(data.map((d) => d.application.name));
-    return Array.from(unique);
-  }, [data]);
+    if (!workflows) return [];
+    return workflows.map(wf => ({
+      id: wf.id!,
+      name: wf.name
+    }));
+  }, [workflows]);
 
   // Total de páginas baseado no processCount
   const totalPages =
-    data.length > 0 ? Math.ceil(data[0].processCount / pageSize) : 1;
+    totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1;
+
+
 
   const columns: ColumnDef<ProcessFlow>[] = [
     {
@@ -121,19 +131,32 @@ export function ProcessesTable({
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select value={application} onValueChange={setApplication}>
+        <Select
+          value={application === 0 ? "all" : application.toString()}
+          onValueChange={(v) => {
+            if (v === "all") {
+              setApplication(0); // representa "Todas"
+            } else {
+              setApplication(Number(v));
+            }
+            setPageIndex(0); // 🔥 reseta para a primeira página
+          }}
+        >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Aplicação" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
             {workflowOptions.map((wf) => (
-              <SelectItem key={wf} value={wf}>
-                {wf}
+              <SelectItem key={wf.id} value={wf.id.toString()}>
+                {wf.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+
+
+
         <Select value={dateFilter} onValueChange={setDateFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Data" />
@@ -196,55 +219,55 @@ export function ProcessesTable({
                                   <span className="w-3 h-3 rounded-sm bg-blue-500" />
                                   <span>TO APROVE</span>
                                 </div>
-                              
+
+                              </div>
+                            </div>
+                            <div className="mt-2 h-80 border rounded-md bg-background">
+                              <Flow nodes={process.nodes} edges={process.edges} />
                             </div>
                           </div>
-                          <div className="mt-2 h-80 border rounded-md bg-background">
-                            <Flow nodes={process.nodes} edges={process.edges} />
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                )
-              }
-                </React.Fragment>
-          );
-            })
-          ) : (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
-              Nenhum resultado encontrado.
-            </TableCell>
-          </TableRow>
-          )}
-        </TableBody>
+                        </TableCell>
+                      </TableRow>
+                    )
+                    }
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Nenhum resultado encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
 
-      </Table>
-    </div>
-      {/* Pagination */ }
-  <div className="flex items-center justify-between mt-4">
-    <span className="text-sm text-muted-foreground">
-      Página {pageIndex + 1} de {totalPages}
-    </span>
-    <div className="flex gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={pageIndex === 0}
-        onClick={() => setPageIndex(Math.max(pageIndex - 1, 0))}
-      >
-        Anterior
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={pageIndex >= totalPages - 1}
-        onClick={() => setPageIndex(Math.min(pageIndex + 1, totalPages - 1))}
-      >
-        Próxima
-      </Button>
-    </div>
-  </div>
+        </Table>
+      </div>
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <span className="text-sm text-muted-foreground">
+          Página {pageIndex + 1} de {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pageIndex === 0}
+            onClick={() => setPageIndex(Math.max(pageIndex - 1, 0))}
+          >
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pageIndex >= totalPages - 1}
+            onClick={() => setPageIndex(Math.min(pageIndex + 1, totalPages - 1))}
+          >
+            Próxima
+          </Button>
+        </div>
+      </div>
     </div >
   );
 }
