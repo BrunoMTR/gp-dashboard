@@ -12,6 +12,7 @@ import {
   AlertDialogAction
 } from "@/components/ui/alert-dialog";
 import type { NodeItem } from "@/components/workflows/types";
+import { useErrorMessage } from "../hook/useErrorMessage"
 
 export const Route = createFileRoute("/new-workflow")({
   component: NewWorkflow,
@@ -21,12 +22,13 @@ export function NewWorkflow() {
   const [nodesExist, setNodesExist] = React.useState(false);
 
   const { status, proceed, reset } = useBlocker({
-    shouldBlockFn: () => nodesExist, // bloqueia apenas se houver nodes
+    shouldBlockFn: () => nodesExist, 
     withResolver: true,
   });
 
+
   return (
-    <div className="p-4">
+    <div className="p-4 h-full w-full overflow-hidden" >
       <FlowPreview NodesChange={(nodesList: NodeItem[]) => setNodesExist(nodesList.length > 0)} />
 
       {status === "blocked" && (

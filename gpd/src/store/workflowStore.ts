@@ -5,7 +5,7 @@ type WorkflowState = {
   isSheetOpen: boolean;
   isModalOpen: boolean;
   isFormOpen: boolean;
-  setSelectedItem: (id: number | null) => void;
+  setSelectedItem: (id: number | undefined) => void;
   toggleSheet: (value: boolean) => void;
   toggleModal: (value: boolean) => void;
   toggleForm: (value: boolean) => void;

@@ -1,4 +1,4 @@
-import type { Workflow } from "@/api/workflows/types"
+import type { Application } from "@/api/workflows/types"
 import  {Alert} from '../workflows/AlertDialog'
 import {
   Menubar,
@@ -19,14 +19,14 @@ interface MenuProps {
   onOpenSheet: () => void
   onOpenModal: () => void
   onOpenForm: () => void
-  workflow: Workflow | null
+  application: Application | null
 }
 
-export function Menu({ onOpenSheet, onOpenModal, onOpenForm, workflow }: MenuProps) {
+export function Menu({ onOpenSheet, onOpenModal,  application: workflow }: MenuProps) {
   const hasWorkflowData = Boolean(workflow && Object.keys(workflow).length > 0)
   const [open, setOpen] = useState(false);
   return (
-    <div className="w-auto mb-4">
+    <div className="absolute top-32 left-75 z-20 w-fit ">
       <Menubar>
         <MenubarMenu>
           <MenubarTrigger>Fluxo</MenubarTrigger>

@@ -31,7 +31,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/r
 const items = [
   { title: "Registed", url: "/workflow", icon: FileText },
   { title: "New Workflow", url: "/new-workflow", icon: PlusCircle },
-  { title: "Processes", url: "/processes", icon: PlusCircle }
+  { title: "Processes", url: "/processes", icon: PlusCircle },
+  { title: "Documentation", url: "/documentation", icon: PlusCircle }
 ]
 
 export function AppSidebar() {
@@ -42,8 +43,10 @@ export function AppSidebar() {
       setSelectedItem(id)
     }
   }
+ 
   return (
     <Sidebar>
+
       <SidebarHeader className="px-4 py-4">
         <div className="flex flex-row items-center">
           <img
@@ -62,6 +65,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        
         <SidebarGroup>
 
           <SidebarGroupContent>

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCreateW } from "../../api/workflows/mutations";
+import { useCreateWorkflow } from "../../api/workflows/mutations";
 import { useGetUnitsOptions } from '../../api/units/queries'
 import { useQuery } from "@tanstack/react-query";
 import type { Workflow } from "@/api/workflows/types";
@@ -11,7 +11,10 @@ import type { NodeItem } from "./types";
 import { WorkflowAlerts } from "./WorkflowAlerts";
 import { toast } from "sonner";
 import { WorkflowErrorAlert } from "./WorkflowErrorAlert";
-
+import { QueryErrorDialog } from "../../components/QueryErrorDialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import { useErrorMessage } from "../../hook/useErrorMessage"
 
 interface WorkflowConfigurationProps {
   onChangeNodes?: (nodes: NodeItem[]) => void;
@@ -29,12 +32,12 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   const idCounter = React.useRef(0);
 
   const listRef = React.useRef<HTMLDivElement>(null);
-  const { data: unitsData = [], isLoading: isLoadingUnits, error: unitsError } =
+  const { data: unitsData = [], isLoading: isLoadingUnits, error: unitsError, refetch: refetchUnits } =
     useQuery(useGetUnitsOptions())
 
 
 
-  const { mutate: mutateWorkflow, isPending, isError, isSuccess } = useCreateW();
+  const { mutate: mutateWorkflow, isPending, isError, isSuccess } = useCreateWorkflow();
 
 
 
@@ -84,10 +87,10 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
     const nodesPayload = nodesList.map((node, index) => ({
       originId: node.id,
       destinationId: index < nodesList.length - 1
-        ? nodesList[index + 1].id   // aponta para o próximo node
-        : nodesList[0].id,          // último node aponta para o primeiro
+        ? nodesList[index + 1].id
+        : nodesList[0].id,
       approvals: node.parecer,
-      direction: "AVANÇO",          // ou "RECUO" se precisar de lógica diferente
+      direction: "AVANÇO",
     }));
 
     // Atualiza workflow
@@ -162,17 +165,33 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
   const podeAdicionar = !!selectedUnitId && nodesList.length < 10;
   const podeLimpar = nodesList.length > 0;
 
+  if (unitsError) {
+    return (<div>
+      <QueryErrorDialog error={unitsError} refetch={refetchUnits} />
+      <div>
+        <Alert variant="destructive" className="max-w-xl w-full">
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle>Erro:</AlertTitle>
+          <AlertDescription>
+            {useErrorMessage(unitsError)}
+          </AlertDescription>
+        </Alert>
+      </div>
+    </div>
+    )
+  }
 
   return (
-    <Card className="fixed right-10 w-[310px] h-[70vh] flex flex-col z-50 shadow-lg opacity-90">
 
-      <CardHeader className=" px-4 flex flex-col gap-2">
-        <CardTitle className="text-base font-semibold">Configuração do Workflow</CardTitle>
+    <Card className="flex flex-col opacity-90 w-full h-full">
+
+      <CardHeader className=" flex flex-col ">
+        <CardTitle className="text-sm font-semibold">Configuração do Workflow</CardTitle>
         <p className="text-xs text-gray-600">Indique os dados do workflow.</p>
       </CardHeader>
 
 
-      <CardContent className="flex-1 overflow-y-auto px-4 flex flex-col gap-4">
+      <CardContent className="flex-1 overflow-auto ">
         <WorkflowForm
           value={workflow.application}
           onChange={(newApplication) =>
@@ -203,7 +222,7 @@ export function WorkflowConfiguration({ onChangeNodes }: WorkflowConfigurationPr
 
 
 
-        <div className="h-[10%] py-1 px-4 flex gap-2 border-t items-center">
+        <div className="h-[10%] flex  border-t items-center">
           <Button className="flex-1 text-xs h-7" onClick={handleSave} disabled={isPending}>
             {isPending ? "Salvando..." : "Salvar"}
           </Button>

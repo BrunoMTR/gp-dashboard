@@ -14,11 +14,9 @@ import { useState, useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
 import { WorkflowConfiguration } from './WorkflowConfiguration';
 import type { NodeItem } from '../workflows/types'
-import { DepartmentNode } from './department-node';
 
-    const nodeTypes = {
-        department: DepartmentNode, // "department" será o tipo usado no node
-    };
+
+
 export function FlowPreview({ NodesChange }: { NodesChange?: (nodesList: NodeItem[]) => void }) {
 
 
@@ -42,7 +40,7 @@ export function FlowPreview({ NodesChange }: { NodesChange?: (nodesList: NodeIte
 
 
     const handleFlowConfigChange = useCallback((nodesList: NodeItem[]) => {
-      
+
         const reactFlowNodes: Node[] = nodesList.map((item, index) => ({
             id: item.key.toString(),
             type: "department",
@@ -76,26 +74,45 @@ export function FlowPreview({ NodesChange }: { NodesChange?: (nodesList: NodeIte
 
         if (NodesChange) NodesChange(nodesList);
     }, [onNodesChange]);
-    
+
 
     return (
-        <div className="flex-1 flex items-center justify-center border rounded-lg p-4 bg-muted/10">
-            <div style={{ width: '70vw', height: '70vh' }}>
+
+        <div className="flex-1 flex border rounded-lg p-2 h-full w-full">
+
+            <div className="w-7/10 h-full border-r  ">
                 <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
+                    nodes={nodes.map((node) => ({
+                        ...node,
+                        style: {
+                            backgroundColor: "#26adbeff",
+                            color: "white",
+                            padding: 10,
+                            borderRadius: 6,
+                        },
+                    }))}
+
+                    edges={edges.map((edge) => ({
+                        ...edge,
+                        type: "step",
+                        animated: true,
+                        style: { strokeWidth: 2, stroke: "#bfd0f5ff" },
+                    }))}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
+                    nodesDraggable={true}
                     proOptions={proOptions}
-                    nodeTypes={nodeTypes}
-                    >
+                    fitView
+                >
                     <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-                    <WorkflowConfiguration onChangeNodes={handleFlowConfigChange} />
+
                 </ReactFlow>
-                
             </div>
-            
+
+            <div className="w-3/10 h-full pl-2 ">
+                <WorkflowConfiguration onChangeNodes={handleFlowConfigChange} />
+            </div>
         </div>
+
     );
 }

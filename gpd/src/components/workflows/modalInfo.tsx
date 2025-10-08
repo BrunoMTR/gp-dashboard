@@ -9,15 +9,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import * as React from "react"
-import type { Workflow } from "../../api/workflows/types"
+import type { Application } from "../../api/workflows/types"
 
 interface ModalInfoProps {
     open: boolean
     setOpen: (open: boolean) => void
-    workflow: Workflow | null
+    application: Application | null
 }
 
-export function ModalInfo({ open, setOpen, workflow}: ModalInfoProps) {
+export function ModalInfo({ open, setOpen, application: workflow}: ModalInfoProps) {
     const [name, setName] = React.useState(workflow?.name || "")
     const [abbreviation, setAbbreviation] = React.useState(workflow?.abbreviation || "")
     const [team, setTeam] = React.useState(workflow?.team || "")

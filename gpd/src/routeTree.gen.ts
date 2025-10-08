@@ -13,7 +13,9 @@ import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as ProcessesRouteImport } from './routes/processes'
 import { Route as NewWorkflowRouteImport } from './routes/new-workflow'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as DocumentationRouteImport } from './routes/Documentation'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocumentationProcessIdRouteImport } from './routes/Documentation/$processId'
 
 const WorkflowRoute = WorkflowRouteImport.update({
   id: '/workflow',
@@ -35,44 +37,83 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentationRoute = DocumentationRouteImport.update({
+  id: '/Documentation',
+  path: '/Documentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentationProcessIdRoute = DocumentationProcessIdRouteImport.update({
+  id: '/$processId',
+  path: '/$processId',
+  getParentRoute: () => DocumentationRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/Documentation': typeof DocumentationRouteWithChildren
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
   '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
+  '/Documentation/$processId': typeof DocumentationProcessIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/Documentation': typeof DocumentationRouteWithChildren
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
   '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
+  '/Documentation/$processId': typeof DocumentationProcessIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/Documentation': typeof DocumentationRouteWithChildren
   '/about': typeof AboutRoute
   '/new-workflow': typeof NewWorkflowRoute
   '/processes': typeof ProcessesRoute
   '/workflow': typeof WorkflowRoute
+  '/Documentation/$processId': typeof DocumentationProcessIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
+  fullPaths:
+    | '/'
+    | '/Documentation'
+    | '/about'
+    | '/new-workflow'
+    | '/processes'
+    | '/workflow'
+    | '/Documentation/$processId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
-  id: '__root__' | '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
+  to:
+    | '/'
+    | '/Documentation'
+    | '/about'
+    | '/new-workflow'
+    | '/processes'
+    | '/workflow'
+    | '/Documentation/$processId'
+  id:
+    | '__root__'
+    | '/'
+    | '/Documentation'
+    | '/about'
+    | '/new-workflow'
+    | '/processes'
+    | '/workflow'
+    | '/Documentation/$processId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocumentationRoute: typeof DocumentationRouteWithChildren
   AboutRoute: typeof AboutRoute
   NewWorkflowRoute: typeof NewWorkflowRoute
   ProcessesRoute: typeof ProcessesRoute
@@ -109,6 +150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Documentation': {
+      id: '/Documentation'
+      path: '/Documentation'
+      fullPath: '/Documentation'
+      preLoaderRoute: typeof DocumentationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -116,11 +164,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/Documentation/$processId': {
+      id: '/Documentation/$processId'
+      path: '/$processId'
+      fullPath: '/Documentation/$processId'
+      preLoaderRoute: typeof DocumentationProcessIdRouteImport
+      parentRoute: typeof DocumentationRoute
+    }
   }
 }
 
+interface DocumentationRouteChildren {
+  DocumentationProcessIdRoute: typeof DocumentationProcessIdRoute
+}
+
+const DocumentationRouteChildren: DocumentationRouteChildren = {
+  DocumentationProcessIdRoute: DocumentationProcessIdRoute,
+}
+
+const DocumentationRouteWithChildren = DocumentationRoute._addFileChildren(
+  DocumentationRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocumentationRoute: DocumentationRouteWithChildren,
   AboutRoute: AboutRoute,
   NewWorkflowRoute: NewWorkflowRoute,
   ProcessesRoute: ProcessesRoute,
