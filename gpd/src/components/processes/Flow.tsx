@@ -11,7 +11,7 @@ import {
   type Edge as FlowEdge,
 } from "@xyflow/react";
 import type { Flow } from "@/api/processes/types";
-
+import { UnitNode } from "./UnitNode";
 
 export function Flow({ nodes: initialNodes, edges: initialEdges }: Flow) {
   const [nodes, setNodes] = React.useState<FlowNode[]>(initialNodes);
@@ -27,21 +27,17 @@ export function Flow({ nodes: initialNodes, edges: initialEdges }: Flow) {
     []
   );
 
+  const nodeTypes = React.useMemo(
+    () => ({ unit: UnitNode }),
+    []
+  );
+
   return (
     <ReactFlow
       nodes={nodes.map((node) => ({
-        ...node,
-        style: {
-          backgroundColor:
-            node.data.status === "current"
-              ? "#f59e0b"
-              : node.data.status === "visited"
-              ? "#ccccccff"
-              : "#3b82f6",
-          color: "white",
-          padding: 10,
-          borderRadius: 6,
-        },
+        ...node,       
+        type: "unit",
+     
       }))}
       edges={edges.map((edge) => ({
         ...edge,
@@ -51,6 +47,7 @@ export function Flow({ nodes: initialNodes, edges: initialEdges }: Flow) {
       }))}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
       nodesDraggable={true}
       fitView
     >
