@@ -31,8 +31,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/r
 const items = [
   { title: "Registed", url: "/workflow", icon: FileText },
   { title: "New Workflow", url: "/new-workflow", icon: PlusCircle },
-  { title: "Processes", url: "/processes", icon: PlusCircle },
-  { title: "Documentation", url: "/documentation", icon: PlusCircle }
+  { title: "Processes", url: "/processes", icon: PlusCircle }
 ]
 
 export function AppSidebar() {

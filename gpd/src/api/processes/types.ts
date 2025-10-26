@@ -2,8 +2,14 @@
 export type NodeData = {
   label: string;
   status: "pending" | "visited" | "current";
-  email: string,
-  abbreviation: string,
+  email: string;
+  approvals: number;
+  history: {
+    at: number;
+    updatedBy: string;
+    updatedAt: string;
+    notified: boolean;
+  }[];
 };
 
 // Representa a posição do nó no grafo
