@@ -1,0 +1,32 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { cancelProcess, approveProcess, returnProcess } from "../../services/processes.service";
+import type { Response, Request } from "../../api/processes/types";
+
+export function useCancelProcess() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Response, Error, { processId: number; request: Request }>({
+    mutationFn: ({ processId, request }) => cancelProcess(processId, request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["processes"] });
+    },
+  });
+}
+
+export function useApproveProcess() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Response, Error, number>({
+    mutationFn: (processId: number) => approveProcess(processId),
+     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
+  });
+}
+
+export function useReturnProcess() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Response, Error, number>({
+    mutationFn: (processId: number) => returnProcess(processId),
+     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
+  });
+}

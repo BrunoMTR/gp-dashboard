@@ -72,6 +72,27 @@ export interface ProcessesApiResponse {
   totalCount: number;
 }
 
+export interface Response{
+  success: boolean;
+  message: string;
+  data: Process
+}
+
+export interface Request{
+  by  : string,
+  note: string
+}
+export interface Process{
+  Id: number;
+  applicationId: number;
+  createdAt: Date;
+  createdBy: string;
+  note: string;
+  at: number;
+  approvals: number;
+  status: string
+}
+
 
 
 export interface ProcessFlow2 {
@@ -121,3 +142,4 @@ export interface Flow {
 }
 
 export type ProcessFlowList = ProcessFlow[];
+
