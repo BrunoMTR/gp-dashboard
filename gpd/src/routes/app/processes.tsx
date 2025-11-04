@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { ProcessesTable as Table } from "@/components/processes/Table"
-import { useProcesses } from "../api/processes/queries"
+import { useProcesses } from "../../api/processes/queries"
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { QueryErrorDialog } from "../components/QueryErrorDialog"
+import { QueryErrorDialog } from "../../components/QueryErrorDialog"
 import { useGetAllWorkflowsOptions } from "@/api/workflows/queries"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -15,7 +15,7 @@ import {
 import { Feed } from "@/components/processes/Feed"
 
 
-export const Route = createFileRoute("/processes")({
+export const Route = createFileRoute("/app/processes")({
   component: RouteComponent,
 
 })

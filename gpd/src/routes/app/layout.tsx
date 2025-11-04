@@ -1,0 +1,42 @@
+// // src/routes/_app/layout.tsx
+// import {createFileRoute, Outlet } from '@tanstack/react-router'
+// import { BreadcrumbNav } from "../../components/BreadcrumbNav"
+// import { CommandMenu } from "../../components/command-menu"
+// import { ThemeToggle } from "../../components/theme-toggle"
+// import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar"
+// import { AppSidebar } from "../../components/app-sidebar"
+// import { GlobalLoader } from "../../components/global-loader"
+// import { ThemeProvider } from "next-themes"
+// import { Toaster } from "sonner"
+
+
+// export const Route = createFileRoute('/app/layout')({
+//   component: AppLayout,
+// })
+
+// export default function AppLayout() {
+//   return (
+//     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+//       <SidebarProvider>
+//         <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
+//           <AppSidebar />
+//           <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+//             <SidebarTrigger />
+//             <GlobalLoader />
+//             <div className="flex items-center justify-between px-4 py-2">
+//               <div className="flex items-center gap-4">
+//                 <BreadcrumbNav />
+//               </div>
+//               <div className="flex items-center gap-2">
+//                 <CommandMenu />
+//                 <ThemeToggle />
+//               </div>
+//             </div>
+//             <Outlet />  
+//             <Toaster position="bottom-left" />
+//           </main>
+//         </div>
+//       </SidebarProvider>
+//     </ThemeProvider>
+//   )
+// }

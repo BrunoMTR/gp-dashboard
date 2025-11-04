@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios"
-import type { ProcessesApiResponse, Request } from "../api/processes/types"
-
+import type { ProcessesApiResponse } from "../api/processes/types"
+import type { Response, Request } from "../api/processes/types";
 const PROCESSES_PATH = "/processes"
 
 export async function getAllProcesses(params: {
@@ -15,17 +15,28 @@ export async function getAllProcesses(params: {
 }
 
 
-export async function cancelProcess(Id: number, request: Request) {
-  const response = await axiosInstance.post(`${PROCESSES_PATH}/${Id}/cancel`, request);
-  return response.data;
+export async function cancelProcess(processId: number, request: Request): Promise<Response> {
+  const response = await axiosInstance.patch(`${PROCESSES_PATH}/${processId}/cancel`, request);
+  return response.data as Response;
 }
 
-export async function approveProcess(processId: number) {
-  const response = await axiosInstance.post(`${PROCESSES_PATH}/${processId}/approve`, Request);
-  return response.data;
+
+export async function approveProcess(request: Request): Promise<Response> {
+  const formData = new FormData()
+  formData.append("processId", request.processId!.toString())
+  formData.append("updatedBy", request.updatedBy)
+  formData.append("note", request.note)
+
+  const response = await axiosInstance.patch(`${PROCESSES_PATH}/approve`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return response.data as Response
 }
 
-export async function returnProcess(processId: number) {
-  const response = await axiosInstance.post(`${PROCESSES_PATH}/${processId}/return`,Request);
-  return response.data;
+
+
+export async function returnProcess(processId: number, request: Request): Promise<Response> {
+  const response = await axiosInstance.patch(`${PROCESSES_PATH}/${processId}/return`, request);
+  return response.data as Response;
 }
+

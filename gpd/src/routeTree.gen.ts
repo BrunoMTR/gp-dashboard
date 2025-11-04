@@ -9,25 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WorkflowRouteImport } from './routes/workflow'
-import { Route as ProcessesRouteImport } from './routes/processes'
-import { Route as NewWorkflowRouteImport } from './routes/new-workflow'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppWorkflowRouteImport } from './routes/app/workflow'
+import { Route as AppProcessesRouteImport } from './routes/app/processes'
+import { Route as AppNewWorkflowRouteImport } from './routes/app/new-workflow'
 
-const WorkflowRoute = WorkflowRouteImport.update({
-  id: '/workflow',
-  path: '/workflow',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProcessesRoute = ProcessesRouteImport.update({
-  id: '/processes',
-  path: '/processes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewWorkflowRoute = NewWorkflowRouteImport.update({
-  id: '/new-workflow',
-  path: '/new-workflow',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -35,71 +28,113 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppWorkflowRoute = AppWorkflowRouteImport.update({
+  id: '/workflow',
+  path: '/workflow',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProcessesRoute = AppProcessesRouteImport.update({
+  id: '/processes',
+  path: '/processes',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppNewWorkflowRoute = AppNewWorkflowRouteImport.update({
+  id: '/new-workflow',
+  path: '/new-workflow',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/new-workflow': typeof NewWorkflowRoute
-  '/processes': typeof ProcessesRoute
-  '/workflow': typeof WorkflowRoute
+  '/login': typeof LoginRoute
+  '/app/new-workflow': typeof AppNewWorkflowRoute
+  '/app/processes': typeof AppProcessesRoute
+  '/app/workflow': typeof AppWorkflowRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/new-workflow': typeof NewWorkflowRoute
-  '/processes': typeof ProcessesRoute
-  '/workflow': typeof WorkflowRoute
+  '/login': typeof LoginRoute
+  '/app/new-workflow': typeof AppNewWorkflowRoute
+  '/app/processes': typeof AppProcessesRoute
+  '/app/workflow': typeof AppWorkflowRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/new-workflow': typeof NewWorkflowRoute
-  '/processes': typeof ProcessesRoute
-  '/workflow': typeof WorkflowRoute
+  '/login': typeof LoginRoute
+  '/app/new-workflow': typeof AppNewWorkflowRoute
+  '/app/processes': typeof AppProcessesRoute
+  '/app/workflow': typeof AppWorkflowRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/about'
+    | '/login'
+    | '/app/new-workflow'
+    | '/app/processes'
+    | '/app/workflow'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
-  id: '__root__' | '/' | '/about' | '/new-workflow' | '/processes' | '/workflow'
+  to:
+    | '/'
+    | '/about'
+    | '/login'
+    | '/app/new-workflow'
+    | '/app/processes'
+    | '/app/workflow'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/about'
+    | '/login'
+    | '/app/new-workflow'
+    | '/app/processes'
+    | '/app/workflow'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  NewWorkflowRoute: typeof NewWorkflowRoute
-  ProcessesRoute: typeof ProcessesRoute
-  WorkflowRoute: typeof WorkflowRoute
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/workflow': {
-      id: '/workflow'
-      path: '/workflow'
-      fullPath: '/workflow'
-      preLoaderRoute: typeof WorkflowRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/processes': {
-      id: '/processes'
-      path: '/processes'
-      fullPath: '/processes'
-      preLoaderRoute: typeof ProcessesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/new-workflow': {
-      id: '/new-workflow'
-      path: '/new-workflow'
-      fullPath: '/new-workflow'
-      preLoaderRoute: typeof NewWorkflowRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -109,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -116,15 +158,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/workflow': {
+      id: '/app/workflow'
+      path: '/workflow'
+      fullPath: '/app/workflow'
+      preLoaderRoute: typeof AppWorkflowRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/processes': {
+      id: '/app/processes'
+      path: '/processes'
+      fullPath: '/app/processes'
+      preLoaderRoute: typeof AppProcessesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/new-workflow': {
+      id: '/app/new-workflow'
+      path: '/new-workflow'
+      fullPath: '/app/new-workflow'
+      preLoaderRoute: typeof AppNewWorkflowRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppNewWorkflowRoute: typeof AppNewWorkflowRoute
+  AppProcessesRoute: typeof AppProcessesRoute
+  AppWorkflowRoute: typeof AppWorkflowRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppNewWorkflowRoute: AppNewWorkflowRoute,
+  AppProcessesRoute: AppProcessesRoute,
+  AppWorkflowRoute: AppWorkflowRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  NewWorkflowRoute: NewWorkflowRoute,
-  ProcessesRoute: ProcessesRoute,
-  WorkflowRoute: WorkflowRoute,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

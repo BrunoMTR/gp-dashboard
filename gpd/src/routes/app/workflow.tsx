@@ -10,8 +10,10 @@ import type { Application } from '@/api/workflows/types'
 import { ModalInfo } from '@/components/workflows/modalInfo'
 import { useWorkflowState } from '@/store/workflowStore'
 import { useSelectedWorkflowFromSearch } from '@/hook/useSelectedWorkflowFromSearch'
-import { QueryErrorDialog } from "../components/QueryErrorDialog"
-export const Route = createFileRoute('/workflow')({
+import { QueryErrorDialog } from "../../components/QueryErrorDialog"
+
+
+export const Route = createFileRoute('/app/workflow')({
   validateSearch: (search: Record<string, unknown>) => ({
     selected: search.selected ? Number(search.selected) : undefined,
   }),
@@ -48,7 +50,7 @@ function WorkflowPage() {
     (wf: Application) => {
       setSelectedItem(wf.id);
       router.navigate({
-        to: '/workflow',
+        to: '/app/workflow',
         search: { selected: wf.id },
         replace: true,
       });

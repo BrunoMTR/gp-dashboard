@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 import {
   CommandDialog,
   CommandEmpty,
@@ -9,67 +9,78 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command";
-import { Search } from "lucide-react";
-import { toast } from "sonner"; // ✅ Importa o sonner
+} from "@/components/ui/command"
+import { Search } from "lucide-react"
+import { toast } from "sonner"
 import {
   useCancelProcess,
   useApproveProcess,
   useReturnProcess,
-} from "../api/processes/mutations";
-import {
-  Item,
-  ItemContent,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
-import { Spinner } from "@/components/ui/spinner";
+} from "../api/processes/mutations"
+import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item"
+import { Spinner } from "@/components/ui/spinner"
+import { useAuthStore } from "../store/AuthContext"
+import type { Request } from "@/api/processes/types"
 
 export function CommandMenu() {
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
-  const [currentCommand, setCurrentCommand] = React.useState<string | null>(null);
+  const [open, setOpen] = React.useState(false)
+  const [inputValue, setInputValue] = React.useState("")
+  const [currentCommand, setCurrentCommand] = React.useState<string | null>(null)
 
-  const cancelMutation = useCancelProcess();
-  const approveMutation = useApproveProcess();
-  const returnMutation = useReturnProcess();
+  const { user } = useAuthStore()
+  const cancelMutation = useCancelProcess()
+  const approveMutation = useApproveProcess()
+  const returnMutation = useReturnProcess()
 
   async function handleCommand(command: string) {
-    const [action, value] = command.split(":");
-    const processId = Number(value);
+    const parts = command.split(":")
+    const action = parts[0]?.trim().toLowerCase()
+    const processId = Number(parts[1])
+    const note = parts.slice(2).join(":").trim() || ""
 
-    if (!action || !value || isNaN(processId)) {
-      toast.error("Formato inválido. Use algo como acção:ID", { duration: 5000 });
-      return;
+    if (!action || isNaN(processId)) {
+      toast.error("Formato inválido. Use algo como acção:ID[:nota]")
+      return
     }
 
-    setCurrentCommand(command);
+    if (!user?.username) {
+      toast.error("Utilizador não autenticado.")
+      return
+    }
+
+    const request: Request = {
+      updatedBy: user.username,
+      note,
+      ...(action === "aprovar" ? { processId } : {}),
+    }
+
+    setCurrentCommand(command)
 
     try {
       if (action === "cancelar") {
-        await cancelMutation.mutateAsync(processId,);
-        toast.success(`Processo ${processId} cancelado com sucesso!`, { duration: 5000 });
+        await cancelMutation.mutateAsync({ processId, request })
+        toast.success(`Processo ${processId} cancelado com sucesso!`)
       } else if (action === "aprovar") {
-        await approveMutation.mutateAsync(processId);
-        toast.success(`Processo ${processId} aprovado!`, { duration: 5000 });
+        await approveMutation.mutateAsync({ request })
+        toast.success(`Processo ${processId} aprovado!`)
       } else if (action === "devolver") {
-        await returnMutation.mutateAsync(processId);
-        toast.success(`Processo ${processId} devolvido!`, { duration: 5000 });
+        await returnMutation.mutateAsync({ processId, request })
+        toast.success(`Processo ${processId} devolvido!`)
       } else {
-        toast.warning(`Comando desconhecido: ${action}`, { duration: 5000 });
+        toast.warning(`Comando desconhecido: ${action}`)
       }
     } catch (error: any) {
-      toast.error(`Erro: ${error.message || "Falha ao executar ação"}`, { duration: 5000 });
+      toast.error(`Erro: ${error.message || "Falha ao executar ação"}`)
     } finally {
-      setCurrentCommand(null);
+      setCurrentCommand(null)
     }
   }
 
-  const isCommandPattern = /^[a-zA-Z]+:\d+$/.test(inputValue.trim());
+  const isCommandPattern = /^[a-zA-Z]+:\d+(:.+)?$/.test(inputValue.trim())
   const isLoading =
     cancelMutation.isPending ||
     approveMutation.isPending ||
-    returnMutation.isPending;
+    returnMutation.isPending
 
   return (
     <>
@@ -85,10 +96,10 @@ export function CommandMenu() {
         <CommandInput
           value={inputValue}
           onValueChange={setInputValue}
-          placeholder="Digite um comando (ex: acção:ID)"
+          placeholder="Digite um comando (ex: acção:ID[:nota])"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleCommand(inputValue.trim());
+              handleCommand(inputValue.trim())
             }
           }}
         />
@@ -116,18 +127,18 @@ export function CommandMenu() {
           <CommandSeparator />
 
           <CommandGroup heading="Modelos de comando">
-            <CommandItem onSelect={() => setInputValue("cancelar:ID")}>
-              cancelar: ID
+            <CommandItem onSelect={() => setInputValue("cancelar:ID:motivo opcional")}>
+              cancelar: ID : nota opcional
             </CommandItem>
-            <CommandItem onSelect={() => setInputValue("aprovar:ID")}>
-              aprovar: ID
+            <CommandItem onSelect={() => setInputValue("aprovar:ID:nota opcional")}>
+              aprovar: ID : nota opcional
             </CommandItem>
-            <CommandItem onSelect={() => setInputValue("devolver:ID")}>
-              devolver: ID
+            <CommandItem onSelect={() => setInputValue("devolver:ID:nota opcional")}>
+              devolver: ID : nota opcional
             </CommandItem>
           </CommandGroup>
         </CommandList>
       </CommandDialog>
     </>
-  );
+  )
 }

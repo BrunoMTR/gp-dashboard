@@ -2,6 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { useWorkflowState } from '@/store/workflowStore'
 import AppIcon from "@/images/ico.png"
 import { ChevronRight, FileText, PlusCircle, Layers } from "lucide-react"
+import { useAuthStore } from '../store/AuthContext'
+import { useUserLogout } from '../api/Auth/queries'
 
 import {
   Sidebar,
@@ -29,17 +31,30 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/r
 
 
 const items = [
-  { title: "Registed", url: "/workflow", icon: FileText },
-  { title: "New Workflow", url: "/new-workflow", icon: PlusCircle },
-  { title: "Processes", url: "/processes", icon: PlusCircle }
+  { title: "Registed", url: "/app/workflow", icon: FileText },
+  { title: "New Workflow", url: "/app/new-workflow", icon: PlusCircle },
+  { title: "Processes", url: "/app/processes", icon: PlusCircle }
 ]
 
 export function AppSidebar() {
   const setSelectedItem = useWorkflowState((state) => state.setSelectedItem)
+  const user = useAuthStore((state) => state.user)
+  const logoutStore = useAuthStore((state) => state.logout)
+  const userLogout = useUserLogout()
 
   const handleNavigate = (url: string, id?: number) => {
-    if (url === '/workflow' && id !== undefined) {
+    if (url === '/app/workflow' && id !== undefined) {
       setSelectedItem(id)
+    }
+  }
+
+   const handleLogout = async () => {
+    try {
+      await userLogout.mutateAsync()
+      await logoutStore() 
+      window.location.href = '/login'
+    } catch (err) {
+      console.error('Erro ao sair', err)
     }
   }
  
@@ -106,7 +121,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{ 'Conta logada'}</DropdownMenuLabel>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -114,13 +129,12 @@ export function AppSidebar() {
                 className="w-[--radix-popper-anchor-width]"
               >
                 <DropdownMenuItem>
-                  <span>Account</span>
+                  <span>{user?.username || 'Username não disponível'}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span>Billing</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Sign out</span>
+                  <button onClick={handleLogout} className="w-full text-left">
+                    Sair
+                  </button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

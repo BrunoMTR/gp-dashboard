@@ -79,8 +79,9 @@ export interface Response{
 }
 
 export interface Request{
-  by  : string,
-  note: string
+  updatedBy : string,
+  note: string,
+  processId?: number;
 }
 export interface Process{
   Id: number;

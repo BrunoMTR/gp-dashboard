@@ -4,29 +4,26 @@ import type { Response, Request } from "../../api/processes/types";
 
 export function useCancelProcess() {
   const queryClient = useQueryClient();
-
   return useMutation<Response, Error, { processId: number; request: Request }>({
     mutationFn: ({ processId, request }) => cancelProcess(processId, request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["processes"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
   });
 }
 
 export function useApproveProcess() {
-  const queryClient = useQueryClient();
-
-  return useMutation<Response, Error, number>({
-    mutationFn: (processId: number) => approveProcess(processId),
-     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
-  });
+  const queryClient = useQueryClient()
+  return useMutation<Response, Error, { request: Request }>({
+    mutationFn: ({ request }) => approveProcess(request),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
+  })
 }
 
 export function useReturnProcess() {
   const queryClient = useQueryClient();
-
-  return useMutation<Response, Error, number>({
-    mutationFn: (processId: number) => returnProcess(processId),
-     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
+  return useMutation<Response, Error, { processId: number; request: Request }>({
+    mutationFn: ({ processId, request }) => returnProcess(processId, request),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["processes"] }),
   });
 }
+
+
