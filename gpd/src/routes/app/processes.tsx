@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { ProcessesTable as Table } from "@/components/processes/Table"
 import { useProcesses } from "../../api/processes/queries"
+import { useDocs } from "../../api/processes/queries"
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { QueryErrorDialog } from "../../components/QueryErrorDialog"
@@ -13,6 +14,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import { Feed } from "@/components/processes/Feed"
+import { Docs } from "@/components/processes/Docs"
 
 
 export const Route = createFileRoute("/app/processes")({
@@ -37,6 +39,22 @@ function RouteComponent() {
     dateFilter,
   })
   const totalCount = data?.totalCount ?? 0;
+
+
+   const {
+    data: dataDocuments,
+    isLoading: isLoadingDocuments,
+    error: errorDocuments,
+    refetch: refetchDocs,
+  } = useDocs({
+    pageIndex,
+    pageSize,
+    search,
+    applicationId,
+    dateFilter,
+  })
+
+  const totalCountDocuments = dataDocuments?.totalCount ?? 0
 
   if (isLoading) {
     return (
@@ -80,7 +98,24 @@ function RouteComponent() {
         </TabsContent>
         
         <TabsContent value="in-progress">
+          
+          <Docs
+            totalCount={totalCountDocuments}
+            data={dataDocuments?.data ?? []}   
+            search={search}
+            setSearch={setSearch}
+            application={applicationId}
+            setApplication={setApplicationId}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            pageIndex={pageIndex}
+            setPageIndex={setPageIndex}
+            pageSize={pageSize}
+            workflows={workflowsData}
+          />
+
           <Feed/>
+        
         </TabsContent>
     </Tabs >
     </div >

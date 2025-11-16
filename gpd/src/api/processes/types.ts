@@ -72,6 +72,25 @@ export interface ProcessesApiResponse {
   totalCount: number;
 }
 
+export interface DocsApiResponse {
+  success: boolean;
+  message: string;
+  data: Document[];
+  totalCount: number;
+}
+
+export interface Document{
+  id: number;
+  fileName: string;
+  filePath: string;
+  uploadesBy: string;
+  uploatedAt: Date;
+  processId: number;
+}
+
+
+
+
 export interface Response{
   success: boolean;
   message: string;

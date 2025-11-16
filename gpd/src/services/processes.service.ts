@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios"
-import type { ProcessesApiResponse } from "../api/processes/types"
+import type { ProcessesApiResponse, DocsApiResponse } from "../api/processes/types"
 import type { Response, Request } from "../api/processes/types";
 const PROCESSES_PATH = "/processes"
 
@@ -13,6 +13,18 @@ export async function getAllProcesses(params: {
   const response = await axiosInstance.get<ProcessesApiResponse>(PROCESSES_PATH, { params })
   return response.data
 }
+
+export async function getAllDocs(params: {
+  pageIndex?: number
+  pageSize?: number
+  search?: string
+  applicationId?: number
+  dateFilter?: string
+}): Promise<DocsApiResponse> {
+  const response = await axiosInstance.get<DocsApiResponse>(`${PROCESSES_PATH}/docs`, { params })
+  return response.data
+}
+
 
 
 export async function cancelProcess(processId: number, request: Request): Promise<Response> {

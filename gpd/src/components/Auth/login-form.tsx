@@ -42,9 +42,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Entrar na conta</CardTitle>
           <CardDescription>
-            Enter your username and password to continue
+            Insira o seu username e password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -80,7 +80,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
               <Field>
                 <Button type="submit" className="w-full">
-                  Login
+                  Entrar
                 </Button>
               </Field>
             </FieldGroup>
