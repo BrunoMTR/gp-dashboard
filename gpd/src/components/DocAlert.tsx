@@ -5,14 +5,13 @@ import { useGlobalAlert } from "../components/common/GlobalAlertProvider";
 
 interface UploadStatus {
   processId: string;
-  status: string; // Pending, Uploading, Uploaded, Failed, etc.
+  status: string;
   fileName?: string;
   fileSize?: string;
   uploadedBy?: string;
   reason?: string;
 }
 
-// Mapeia status para o variant válido do GlobalAlert
 const statusVariantMap: Record<string, "default" | "destructive" | "success"> = {
   pending: "default",
   uploading: "default",
@@ -20,6 +19,12 @@ const statusVariantMap: Record<string, "default" | "destructive" | "success"> = 
   success: "success",
   failed: "destructive",
   error: "destructive",
+};
+
+// 🔥 Função para limitar texto
+const truncate = (text: string | undefined, max: number): string => {
+  if (!text) return "";
+  return text.length > max ? text.substring(0, max) + "..." : text;
 };
 
 export const DocAlert: React.FC = () => {
@@ -38,9 +43,14 @@ export const DocAlert: React.FC = () => {
     connection.on("ReceiveUploadStatus", (msg: UploadStatus) => {
       const variant = statusVariantMap[msg.status.toLowerCase()] ?? "default";
 
-      const message = `${msg.fileName || "Arquivo"} (${msg.processId}) ${
+      // ✂️ Aplica limites (ajusta os números conforme queres)
+      const fileName = truncate(msg.fileName, 20);
+      const reason = truncate(msg.reason, 30);
+      const processId = truncate(msg.processId, 15);
+
+      const message = `${fileName || "Arquivo"} (${processId}) ${
         msg.status.toLowerCase() === "failed" || msg.status.toLowerCase() === "error"
-          ? "falhou: " + (msg.reason || "erro desconhecido")
+          ? "falhou: " + (reason || "erro desconhecido")
           : msg.status
       }`;
 

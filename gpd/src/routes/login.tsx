@@ -18,7 +18,7 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: "/app/processes" }) 
+      navigate({ to: "/app/processes" })
     }
   }, [isAuthenticated, navigate])
 
