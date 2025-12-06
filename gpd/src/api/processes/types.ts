@@ -72,6 +72,47 @@ export interface ProcessesApiResponse {
   totalCount: number;
 }
 
+export interface DocsApiResponse {
+  success: boolean;
+  message: string;
+  data: Document[];
+  totalCount: number;
+}
+
+export interface Document{
+  id: number;
+  fileName: string;
+  filePath: string;
+  uploadesBy: string;
+  uploatedAt: Date;
+  processId: number;
+}
+
+
+
+
+export interface Response{
+  success: boolean;
+  message: string;
+  data: Process
+}
+
+export interface Request{
+  updatedBy : string,
+  note: string,
+  processId?: number;
+}
+export interface Process{
+  Id: number;
+  applicationId: number;
+  createdAt: Date;
+  createdBy: string;
+  note: string;
+  at: number;
+  approvals: number;
+  status: string
+}
+
 
 
 export interface ProcessFlow2 {
@@ -121,3 +162,4 @@ export interface Flow {
 }
 
 export type ProcessFlowList = ProcessFlow[];
+

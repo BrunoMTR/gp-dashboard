@@ -12,9 +12,9 @@ import {
   AlertDialogAction
 } from "@/components/ui/alert-dialog";
 import type { NodeItem } from "@/components/workflows/types";
-import { useErrorMessage } from "../hook/useErrorMessage"
+import { useErrorMessage } from "../../hook/useErrorMessage"
 
-export const Route = createFileRoute("/new-workflow")({
+export const Route = createFileRoute("/app/new-workflow")({
   component: NewWorkflow,
 });
 

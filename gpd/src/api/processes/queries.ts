@@ -1,6 +1,6 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { getAllProcesses } from '../../services/processes.service';
-import type { ProcessesApiResponse } from '../../api/processes/types';
+import { getAllProcesses, getAllDocs } from '../../services/processes.service';
+import type { ProcessesApiResponse, DocsApiResponse } from '../../api/processes/types';
 
 interface Filters {
   pageIndex: number;
@@ -20,3 +20,14 @@ export function useProcesses(filters: Filters) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export function useDocs(filters: Filters) {
+  return useQuery<DocsApiResponse, Error>({
+    queryKey: ["docs", filters],
+    queryFn: () => getAllDocs(filters),
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+

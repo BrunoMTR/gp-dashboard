@@ -3,7 +3,7 @@ import { useSearch } from "@tanstack/react-router"
 import React from "react"
 
 export function useSelectedWorkflowFromSearch() {
-  const search = useSearch({ from: '/workflow' })
+  const search = useSearch({ from: '/app/workflow' })
   const setSelectedItem = useWorkflowState(state => state.setSelectedItem)
 
   React.useEffect(() => {
