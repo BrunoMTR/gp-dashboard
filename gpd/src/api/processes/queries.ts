@@ -2,6 +2,9 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { getAllProcesses, getAllDocs } from '../../services/processes.service';
 import type { ProcessesApiResponse, DocsApiResponse } from '../../api/processes/types';
 
+import { useMutation } from '@tanstack/react-query';
+import { downloadDoc } from '../../services/processes.service';
+
 interface Filters {
   pageIndex: number;
   pageSize: number;
@@ -31,3 +34,10 @@ export function useDocs(filters: Filters) {
 }
 
 
+
+export function useDownloadDoc() {
+  return useMutation({
+    mutationFn: ({ documentId, fileName, fileType }: { documentId: number; fileName: string; fileType: string }) =>
+      downloadDoc(documentId, fileName, fileType),
+  });
+}

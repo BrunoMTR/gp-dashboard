@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useWorkflowState } from '@/store/workflowStore'
 import AppIcon from "@/images/ico.png"
-import { ChevronRight, FileText, PlusCircle, Layers } from "lucide-react"
+import { ChevronRight, FileText, PlusCircle, Layers, Home } from "lucide-react"
 import { useAuthStore } from '../store/AuthContext'
 import { useUserLogout } from '../api/Auth/queries'
 
@@ -33,8 +33,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/r
 const items = [
   { title: "Registed", url: "/app/workflow", icon: FileText },
   { title: "New Workflow", url: "/app/new-workflow", icon: PlusCircle },
-  { title: "Processes", url: "/app/processes", icon: PlusCircle }
+  { title: "Processes", url: "/app/processes", icon: PlusCircle },
 ]
+
+const otherLinks = { title: "Dashboard", url: "/app", icon: Home }
+
 
 export function AppSidebar() {
   const setSelectedItem = useWorkflowState((state) => state.setSelectedItem)
@@ -48,16 +51,16 @@ export function AppSidebar() {
     }
   }
 
-   const handleLogout = async () => {
+  const handleLogout = async () => {
     try {
       await userLogout.mutateAsync()
-      await logoutStore() 
+      await logoutStore()
       window.location.href = '/login'
     } catch (err) {
       console.error('Erro ao sair', err)
     }
   }
- 
+
   return (
     <Sidebar>
 
@@ -66,8 +69,7 @@ export function AppSidebar() {
           <img
             src={AppIcon}
             alt="App Icon"
-            className="w-12 h-14 object-contain"
-          />
+            className="w-12 h-14 object-contain" />
 
           <div className="flex flex-col">
             <span className="text-base font-semibold">Flow Hub</span>
@@ -79,11 +81,21 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        
         <SidebarGroup>
-
           <SidebarGroupContent>
+            {/* Dashboard separado, mas no mesmo nível do grupo Workflow */}
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to={otherLinks.url} className="flex items-center">
+                    <Home className="mr-2" />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
 
+            {/* Grupo Workflow */}
             <Collapsible defaultOpen className="group/collapsible">
               <SidebarMenuItem className="list-none">
                 <CollapsibleTrigger asChild>
@@ -110,18 +122,17 @@ export function AppSidebar() {
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
-
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <DropdownMenuLabel>{ 'Conta logada'}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{'Conta logada'}</DropdownMenuLabel>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent

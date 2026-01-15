@@ -52,3 +52,22 @@ export async function returnProcess(processId: number, request: Request): Promis
   return response.data as Response;
 }
 
+export async function downloadDoc(documentId: number, fileName: string, fileType: string): Promise<void> {
+  const response = await axiosInstance.get(`${PROCESSES_PATH}/docs/download`, {
+    params: { documentId },
+    responseType: 'blob', // importante
+  });
+
+  const blob = new Blob([response.data], { type: fileType });
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName); // usa o nome real do arquivo
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
+

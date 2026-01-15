@@ -86,6 +86,7 @@ export interface Document{
   uploadesBy: string;
   uploatedAt: Date;
   processId: number;
+  fileType: string;
 }
 
 

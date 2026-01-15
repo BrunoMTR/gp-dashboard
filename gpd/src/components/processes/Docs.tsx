@@ -8,6 +8,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDownloadDoc } from '../../api/processes/queries';
 
 import {
   Table,
@@ -31,6 +32,7 @@ import { FileText, FileSpreadsheet, User } from "lucide-react";
 
 import type { Document } from "@/api/processes/types";
 import type { Application } from "@/api/workflows/types";
+import { Spinner } from "../ui/spinner";
 
 interface DocsTableProps {
   data: Document[];
@@ -61,6 +63,7 @@ export function Docs({
   totalCount,
   workflows,
 }: DocsTableProps) {
+  const { mutate: downloadDoc } = useDownloadDoc();
   const columns = React.useMemo<ColumnDef<Document>[]>(() => [
     {
       accessorKey: "id",
@@ -94,7 +97,7 @@ export function Docs({
       accessorKey: "uploadedBy",
       header: "Carregado por",
       cell: ({ row }) => {
-        const name = row.getValue("uploadedBy");
+        const name: string = row.getValue("uploadedBy");
         return (
           <div className="flex items-center gap-1">
             <User className="w-4 h-4 text-muted-foreground" />
@@ -116,7 +119,36 @@ export function Docs({
       header: "Processo",
       cell: ({ row }) => <span>{row.getValue("processId")}</span>,
     },
-  ], []);
+
+    {
+      id: "Actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const document = row.original;
+        const downloadMutation = useDownloadDoc();
+
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              downloadMutation.mutate({
+                documentId: document.id,
+                fileName: document.fileName,
+                fileType: document.fileType,
+              })
+            }
+
+          >
+
+            Download
+
+          </Button>
+        );
+      },
+    }
+
+  ], [downloadDoc]);
 
   const table = useReactTable({
     data: data,
@@ -188,9 +220,9 @@ export function Docs({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
